@@ -8,8 +8,7 @@ LATENCY = LATENCY_INIT
 
 pygame.init()
 
-def game():
-
+def game(): ##페이커는 엄마가 없다.
 
     screen_width = 800
     screen_height = 500
