@@ -332,7 +332,7 @@ class IME:
         elif self.state==3:
             # 상태2 
             self.state=2
-            self.jung=jung1
+            self.jung=self.jung1
             self.jung1=None;self.jung2=None
             return asm(self.cho,self.jung,self.jong)
         elif self.state==4:
