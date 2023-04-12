@@ -1,5 +1,7 @@
 import pygame
 import random
+from textbox import textBox
+from ime import IME
 
 DEL_THRES = 300
 #THRES_STUNNED = 1500  # 경직된 글자를 지우는 데 드는 시간.
@@ -23,6 +25,7 @@ def game(): ##페이커는 엄마가 없다.
     currIdx = -1
     currAtk = ''
     atkSet = False
+    gameIME = IME
 
     parryStr = ''
     canParry = False
@@ -42,17 +45,27 @@ def game(): ##페이커는 엄마가 없다.
     enemyTypeInterval = 700
 
     running = True
+    isKor = True
+    
+
+    exceptChar = [pygame.K_BACKSPACE, pygame.K_RETURN, pygame.K_LSHIFT, pygame.K_RSHIFT, pygame.K_LALT, pygame.K_RALT] # 글자 아닌 키들 분류
 
     while running:
+        shiftPressed = False
         '''값 입력'''
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
             if event.type == pygame.KEYDOWN:
-                if event.key not in [pygame.K_BACKSPACE, pygame.K_RETURN]:
+
+                if event.key not in exceptChar:
+                    gameIME.getKey(event.key)
                     try: myTextBox.addStr(chr(event.key))
                     except: pass
+                
+                if event.key in [pygame.K_LALT, pygame.K_RALT]:
+                    isKor = not isKor
         '''벡스페이스'''
         if pygame.key.get_pressed()[pygame.K_BACKSPACE]:  # 벡스페이스 누르는 동안 bspc_t 증가
             if backspace_t ==0: 
@@ -71,6 +84,11 @@ def game(): ##페이커는 엄마가 없다.
                     parryTextTime = 1
                 if parryTime == 0: parryTime = 1
                 myTextBox.setStr('')
+        '''쉬프트'''
+        if pygame.key.get_pressed()[pygame.K_LSHIFT, pygame.K_RSHIFT]:
+            shiftPressed = True
+
+        
 
         if myTextBox.getLen() > 0:
             if backspace_t - bspcOffset >= DEL_THRES:
@@ -117,7 +135,7 @@ def game(): ##페이커는 엄마가 없다.
 
         global_t += 1
 
-
+'''
 class textBox:
     font = pygame.font.SysFont("arial", 50)
     mainStr = ''
@@ -153,7 +171,7 @@ class textBox:
         text = self.font.render(self.mainStr, True, self.color)
         pygame.draw.rect(screen, self.color, [pos[0],pos[1],300,self.font.size("a")[1]],4)
         screen.blit(text, pos)
-    
+    '''
 
 
 if __name__ == "__main__":
