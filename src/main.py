@@ -2,6 +2,7 @@ import pygame
 import random
 import time
 from textbox import textBox
+from textlog import textLog
 from ime import IME
 
 backSpaceThreshold = 100
@@ -18,6 +19,7 @@ def game():
 
     myFont = pygame.font.SysFont("나눔고딕", 30)
     myTextBox = textBox(myFont, ml=30)
+    myTextLog = textLog(myFont, grad=True, ml=30, utd = False)
     myAtk = ['토네이도', '사격', '파지직']
     enemyTextBox = textBox(myFont, ml=30)
     enemyStr = ''
@@ -42,7 +44,7 @@ def game():
     backSpaceOffset = 0
     enemyOffset = 0
 
-    enemyTypeInterval = 250
+    enemyTypeInterval = 400
 
     running = True
     isKor = True
@@ -125,6 +127,7 @@ def game():
                 '''행동 성공 시'''
                 if myTextBox.getMainStr() in myAtk:
                     print(myTextBox.getMainStr())
+                    myTextLog.addLine(myTextBox.getMainStr())
                     enemyTextBox.addStunStr(myTextBox.getMainStr())
                 myTextBox.setMainStr('')
         '''쉬프트'''
@@ -155,6 +158,7 @@ def game():
         parryText = myFont.render("PARRY!!", True, (255, 255, 255))
         prQ = myFont.render(parryStr, True, (255, 255, 255))
 
+        myTextLog.draw(screen, (100,400))
         myTextBox.drawBox(screen, (100, 400))
         enemyTextBox.drawBox(screen, (100, 100))
 
