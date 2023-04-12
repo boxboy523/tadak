@@ -19,8 +19,11 @@ class textBox:
         self.rectColor = rc  # 입력창 박스 색깔 / 디폴트 : 하얀색
         self.fontSize = self.font.size("가")
 
-    def getRemainingLen(self):  # 입력창의 여유 공간을 반환함
+    def getLeftLen(self):  # MainStr 입력 시 사용 가능한 여유 공간을 반환함
         return self.maxLength - len(self.mainStr) - len(self.stunStr)
+
+    def getSpareLen(self):  # StunStr 입력 시 사용 가능한 여유 공간을 반환함
+        return self.maxLength - len(self.stunStr)
 
     def setMaxLength(self, i):
         self.maxLength = i
@@ -37,7 +40,7 @@ class textBox:
         return len(self.mainStr)
 
     def addMainStr(self, s):
-        self.mainStr += s[0:self.getRemainingLen()]
+        self.mainStr += s[0:self.getLeftLen()]
 
     def subMainStrFromLeft(self, i):  # 가장 왼쪽 i개의 문자를 제거함
         self.mainStr = self.mainStr[min(i, len(self.mainStr)):]
@@ -53,8 +56,12 @@ class textBox:
     def getStunStr(self):
         return self.stunStr
 
+    def getStunLen(self):
+        return len(self.stunStr)
+
     def addStunStr(self, s):
-        self.stunStr += s[0:self.getRemainingLen()]
+        self.stunStr += s[0:self.getSpareLen()]
+        self.subMainStrFromRight(max(0, self.getMainLen() + self.getStunLen() - self.maxLength))
 
     def subStunStrFromLeft(self, i):  # 가장 왼쪽 i개의 문자를 제거함
         self.stunStr = self.mainStr[min(i, len(self.stunStr)):]
@@ -67,12 +74,13 @@ class textBox:
     def setColor(self, c):
         self.mainColor = c
 
+
     def drawBox(self, screen, pos):
         stunText = self.font.render(self.stunStr, True, self.stunColor, self.stunScreen)
         #blankText = self.font.render(self.mainStr + '가' * self.getRemainingLen(), True, self.screenColor)
         mainText = self.font.render(self.mainStr, True, self.mainColor)
         
-        screen.blit(stunText, (pos[0]+(self.getRemainingLen()+len(self.mainStr))*self.fontSize[0],pos[1]))
+        screen.blit(stunText, (pos[0]+(self.getLeftLen()+len(self.mainStr))*self.fontSize[0],pos[1]))
         #screen.blit(blankText, pos)
         screen.blit(mainText, pos)
 
