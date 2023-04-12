@@ -1,5 +1,6 @@
 import pygame
 import random
+import time
 from textbox import textBox
 from ime import IME
 
@@ -9,17 +10,17 @@ backSpaceLatency = backSpaceLatencyInit
 
 pygame.init()
 
-
 def game():
     screen_width = 1000
     screen_height = 600
     screen = pygame.display.set_mode((screen_width, screen_height))
     pygame.display.set_caption("TADAK")
 
-    myFont = pygame.font.SysFont("나눔고딕", 50)
-    myTextBox = textBox(myFont)
+    myFont = pygame.font.SysFont("Nanum Gothic", 50)
+    myTextBox = textBox(myFont, 10)
+    myAtk = ['토네이도', '사격', '파지직']
+
     enemyTextBox = textBox(myFont)
-    enemyStr = ''
     enemyAtk = ['타격', '파이어볼', '지진', '눈보라', '이제간다아아앗']
     currIdx = -1
     currAtk = ''
@@ -41,7 +42,7 @@ def game():
     backSpaceOffset = 0
     enemyOffset = 0
 
-    enemyTypeInterval = 400
+    enemyTypeInterval = 250
 
     running = True
     isKor = True
@@ -121,17 +122,21 @@ def game():
                     parrySuccess = True
                     parryTextTime = 1
                 if parryTime == 0: parryTime = 1
+                '''행동 성공 시'''
+                if myTextBox.getMainStr() in myAtk:
+                    print(myTextBox.getMainStr())
+                    enemyTextBox.addStunStr(myTextBox.getMainStr())
                 myTextBox.setMainStr('')
         '''쉬프트'''
         if pygame.key.get_pressed()[pygame.K_LSHIFT] or pygame.key.get_pressed()[pygame.K_RSHIFT]:
             shiftPressed = True
-
+        '''백스페이스 적용'''
         if myTextBox.getMainStr() != '':
             if backSpace_t - backSpaceOffset >= backSpaceThreshold:
                 myTextBox.subMainStrFromRight(1)
                 backSpaceOffset += backSpaceLatency
                 backSpaceLatency = max(backSpaceLatencyInit // 2, backSpaceLatency - 10)
-
+        '''적 행동 완료 및 재설정'''
         if not atkSet:
             currIdx = random.randint(0, len(enemyAtk) - 1)
             atkSet = True
@@ -142,10 +147,10 @@ def game():
             if parrySuccess:
                 pass
             else:
-                myTextBox.addStunStr(enemyTextBox.mainStr)
+                myTextBox.addStunStr(enemyTextBox.getMainStr())
             enemyTextBox.setMainStr('')
             parrySuccess = False
-
+        '''패리'''
         screen.fill(pygame.Color("black"))
         parryText = myFont.render("PARRY!!", True, (255, 255, 255))
         prQ = myFont.render(parryStr, True, (255, 255, 255))
@@ -164,6 +169,20 @@ def game():
             screen.blit(parryText, (350, 250))
             parryTextTime += 1
         if parryTextTime > parryTextLast: parryTextTime = 0
+        '''승패 판정'''
+        if myTextBox.getStunLen() == myTextBox.maxLength:
+            gameOverText = myFont.render("죽었다...", True, (255, 255, 255))
+            screen.blit(gameOverText, (350, 250))
+            pygame.display.update()
+            time.sleep(2)
+            break
+
+        if enemyTextBox.getStunLen() == enemyTextBox.maxLength:
+            gameOverText = myFont.render("적을 쓰러뜨렸다!", True, (255, 255, 255))
+            screen.blit(gameOverText, (350, 250))
+            pygame.display.update()
+            time.sleep(2)
+            break
 
         pygame.display.update()
 

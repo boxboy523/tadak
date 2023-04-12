@@ -19,6 +19,8 @@ class textBox:
         self.rectColor = rc  # 입력창 박스 색깔 / 디폴트 : 하얀색
         self.fontSize = self.font.size("가")
 
+    '''Length 관련 메서드'''
+
     def getLeftLen(self):  # MainStr 입력 시 사용 가능한 여유 공간을 반환함
         return self.maxLength - len(self.mainStr) - len(self.stunStr)
 
@@ -28,7 +30,7 @@ class textBox:
     def setMaxLength(self, i):
         self.maxLength = i
 
-    # MainStr 관련 메서드
+    '''MainStr 관련 메서드'''
 
     def setMainStr(self, s):
         self.mainStr = s
@@ -48,7 +50,7 @@ class textBox:
     def subMainStrFromRight(self, i):  # 가장 오른쪽 i개의 문자를 제거함
         self.mainStr = self.mainStr[:max(0, len(self.mainStr) - i)]
 
-    # StunStr 관련 메서드
+    '''StunStr 관련 메서드'''
 
     def setStunStr(self, s):
         self.stunStr = s
@@ -69,19 +71,20 @@ class textBox:
     def subStunStrFromRight(self, i):  # 가장 오른쪽 i개의 문자를 제거함
         self.stunStr = self.stunStr[:max(0, len(self.stunStr) - i)]
 
-    # 색 관련 메서드
+    '''색 관련 메서드'''
 
     def setColor(self, c):
         self.mainColor = c
 
+    
+    '''출력 메서드'''
+
 
     def drawBox(self, screen, pos):
         stunText = self.font.render(self.stunStr, True, self.stunColor, self.stunScreen)
-        #blankText = self.font.render(self.mainStr + '가' * self.getRemainingLen(), True, self.screenColor)
         mainText = self.font.render(self.mainStr, True, self.mainColor)
         
         screen.blit(stunText, (pos[0]+(self.getLeftLen()+len(self.mainStr))*self.fontSize[0],pos[1]))
-        #screen.blit(blankText, pos)
         screen.blit(mainText, pos)
 
         pygame.draw.rect(screen, self.rectColor, [pos[0]-4, pos[1]-4, self.fontSize[0]*self.maxLength+8, self.fontSize[1]+8], 4)
