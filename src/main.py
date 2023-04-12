@@ -3,18 +3,16 @@ import random
 from textbox import textBox
 from ime import IME
 
-DEL_THRES = 300
-# THRES_STUNNED = 1500  # 경직된 글자를 지우는 데 드는 시간.
-LATENCY_INIT = 100  # 백스페이스를 꾹 눌렀을 때 지워지는 사이 간격
-LATENCY = LATENCY_INIT
+backSpaceThreshold = 100
+backSpaceLatencyInit = 50  # 백스페이스를 꾹 눌렀을 때 각 글자가 지워지는 데 걸리는 시간
+backSpaceLatency = backSpaceLatencyInit
 
 pygame.init()
 
 
-def game():  ##페이커는 엄마가 없다.
-
-    screen_width = 800
-    screen_height = 500
+def game():
+    screen_width = 1000
+    screen_height = 600
     screen = pygame.display.set_mode((screen_width, screen_height))
     pygame.display.set_caption("TADAK")
 
@@ -22,7 +20,7 @@ def game():  ##페이커는 엄마가 없다.
     myTextBox = textBox(myFont)
     enemyTextBox = textBox(myFont)
     enemyStr = ''
-    enemyAtk = ['strike', 'bash', 'slash']
+    enemyAtk = ['타격', '파이어볼', '지진', '눈보라', '이제간다아아앗']
     currIdx = -1
     currAtk = ''
     atkSet = False
@@ -39,11 +37,11 @@ def game():  ##페이커는 엄마가 없다.
 
     global_t = 0
 
-    backspace_t = 0
-    bspcOffset = 0
+    backSpace_t = 0
+    backSpaceOffset = 0
     enemyOffset = 0
 
-    enemyTypeInterval = 700
+    enemyTypeInterval = 400
 
     running = True
     isKor = True
@@ -72,7 +70,7 @@ def game():  ##페이커는 엄마가 없다.
                         if shiftPressed and (97 <= ord(c) <= 122):
                             c = c.upper()
                         keyTuple = gameIME.getKey(c, isKor)
-                        if (keyTuple[1]):
+                        if keyTuple[1]:
                             try:
                                 myTextBox.addMainStr(keyTuple[0])
                             except:
@@ -84,8 +82,8 @@ def game():  ##페이커는 엄마가 없다.
                             except:
                                 pass
 
-                        if (len(keyTuple) == 4):
-                            if (keyTuple[3]):
+                        if len(keyTuple) == 4:
+                            if keyTuple[3]:
                                 try:
                                     myTextBox.addMainStr(keyTuple[2])
                                 except:
@@ -102,18 +100,18 @@ def game():  ##페이커는 엄마가 없다.
             if event.type == pygame.KEYUP:
                 if event.key in [pygame.K_LSHIFT, pygame.K_RSHIFT]:
                     shiftPressed = False
-        '''벡스페이스'''
-        if pygame.key.get_pressed()[pygame.K_BACKSPACE]:  # 벡스페이스 누르는 동안 bspc_t 증가
-            if backspace_t == 0:
+        '''백스페이스'''
+        if pygame.key.get_pressed()[pygame.K_BACKSPACE]:  # 백스페이스 누르는 동안 backSpace_t 증가
+            if backSpace_t == 0:
                 bsp = gameIME.backSpace()
                 myTextBox.subMainStrFromRight(1)
-                if bsp != None:
+                if bsp is not None:
                     myTextBox.addMainStr(bsp)
-            backspace_t += 1
+            backSpace_t += 1
         else:
-            backspace_t = 0  # 떼면 초기화
-            bspcOffset = 0
-            LATENCY = LATENCY_INIT
+            backSpace_t = 0  # 떼면 초기화
+            backSpaceOffset = 0
+            backSpaceLatency = backSpaceLatencyInit
         '''엔터'''
         if pygame.key.get_pressed()[pygame.K_RETURN]:
             if myTextBox.getMainStr() != '':
@@ -128,10 +126,10 @@ def game():  ##페이커는 엄마가 없다.
             shiftPressed = True
 
         if myTextBox.getMainStr() != '':
-            if backspace_t - bspcOffset >= DEL_THRES:
+            if backSpace_t - backSpaceOffset >= backSpaceThreshold:
                 myTextBox.subMainStrFromRight(1)
-                bspcOffset += LATENCY
-                LATENCY = max(LATENCY_INIT // 2, LATENCY - 10)
+                backSpaceOffset += backSpaceLatency
+                backSpaceLatency = max(backSpaceLatencyInit // 2, backSpaceLatency - 10)
 
         if not atkSet:
             currIdx = random.randint(0, len(enemyAtk) - 1)
@@ -146,8 +144,8 @@ def game():  ##페이커는 엄마가 없다.
         parryText = myFont.render("PARRY!!", True, (255, 255, 255))
         prQ = myFont.render(parryStr, True, (255, 255, 255))
 
-        myTextBox.drawBox(screen, (300, 350))
-        enemyTextBox.drawBox(screen, (350, 150))
+        myTextBox.drawBox(screen, (100, 400))
+        enemyTextBox.drawBox(screen, (100, 100))
 
         if parryTime > 0:
             # screen.blit(prQ, (200, 150))

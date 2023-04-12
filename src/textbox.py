@@ -4,7 +4,7 @@ import pygame
 class textBox:
     whiteBar = False
 
-    def __init__(self, f, ml=20, c=(255, 255, 255), sc=(255, 255, 0), ac=(0, 255, 255), rc=(255, 255, 255)) -> None:
+    def __init__(self, f, ml=15, c=(255, 255, 255), sc=(255, 255, 0), ac=(0, 255, 255), rc=(255, 255, 255)) -> None:
         self.font = f
         self.maxLength = ml  # 입력창의 길이
 
@@ -65,8 +65,9 @@ class textBox:
         self.mainColor = c
 
     def drawBox(self, screen, pos):
+        print(self.mainStr)
         allText = self.font.render(self.mainStr + ' ' * self.getRemainingLen() + self.stunStr, True, self.stunColor)
         mainText = self.font.render(self.mainStr, True, self.mainColor)
-        pygame.draw.rect(screen, self.rectColor, [pos[0], pos[1], 300, self.font.size("a")[1]], 4)
+        pygame.draw.rect(screen, self.rectColor, [pos[0], pos[1], 710, self.font.size("a")[1]], 4)
         screen.blit(allText, pos)
         screen.blit(mainText, pos)
