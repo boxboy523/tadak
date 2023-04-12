@@ -16,9 +16,11 @@ def game():
     screen = pygame.display.set_mode((screen_width, screen_height))
     pygame.display.set_caption("TADAK")
 
-    myFont = pygame.font.SysFont("나눔고딕", 30)
-    myTextBox = textBox(myFont, ml=30)
+    myFont = pygame.font.SysFont("Nanum Gothic", 30)
+    myTextBox = textBox(myFont, ml=20)
     myAtk = ['토네이도', '사격', '파지직']
+    myLeftBomb = 1
+
     enemyTextBox = textBox(myFont, ml=30)
     enemyStr = ''
     enemyAtk = ['타격', '파이어볼', '지진', '눈보라', '이제간다아아앗']
@@ -42,7 +44,7 @@ def game():
     backSpaceOffset = 0
     enemyOffset = 0
 
-    enemyTypeInterval = 250
+    enemyTypeInterval = 400
 
     running = True
     isKor = True
@@ -124,8 +126,13 @@ def game():
                 if parryTime == 0: parryTime = 1
                 '''행동 성공 시'''
                 if myTextBox.getMainStr() in myAtk:
-                    print(myTextBox.getMainStr())
                     enemyTextBox.addStunStr(myTextBox.getMainStr())
+                if myTextBox.getMainStr() == '폭탄':
+                    if myLeftBomb > 0:
+                        myLeftBomb -= 1
+                        myTextBox.setStunStr('')
+                    else:
+                        pass  # 폭탄이 부족하다! 메세지
                 myTextBox.setMainStr('')
         '''쉬프트'''
         if pygame.key.get_pressed()[pygame.K_LSHIFT] or pygame.key.get_pressed()[pygame.K_RSHIFT]:
