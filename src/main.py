@@ -16,7 +16,7 @@ def game():
     screen = pygame.display.set_mode((screen_width, screen_height))
     pygame.display.set_caption("TADAK")
 
-    myFont = pygame.font.SysFont("Nanum Gothic", 50)
+    myFont = pygame.font.SysFont("나눔고딕", 50)
     myTextBox = textBox(myFont)
     enemyTextBox = textBox(myFont)
     enemyStr = ''

@@ -16,6 +16,7 @@ class textBox:
         self.stunColor = sc  # 스턴 텍스트 색깔 / 디폴트 : 노란색
         self.actionColor = ac  # 명령어 완성 시 텍스트 색깔 / 디폴트 : 하늘색
         self.rectColor = rc  # 입력창 박스 색깔 / 디폴트 : 하얀색
+        self.fontSize = self.font.size("가")
 
     def getRemainingLen(self):  # 입력창의 여유 공간을 반환함
         return self.maxLength - len(self.mainStr) - len(self.stunStr)
@@ -66,10 +67,10 @@ class textBox:
         self.mainColor = c
 
     def drawBox(self, screen, pos):
-        stunText = self.font.render(self.mainStr + '가' * self.getRemainingLen() + self.stunStr, True, self.stunColor)
-        blankText = self.font.render(self.mainStr + '가' * self.getRemainingLen(), True, self.screenColor)
+        stunText = self.font.render(self.stunStr, True, self.stunColor)
+        #blankText = self.font.render(self.mainStr + '가' * self.getRemainingLen(), True, self.screenColor)
         mainText = self.font.render(self.mainStr, True, self.mainColor)
-        pygame.draw.rect(screen, self.rectColor, [pos[0], pos[1], 710, self.font.size("a")[1]], 4)
-        screen.blit(stunText, pos)
-        screen.blit(blankText, pos)
+        pygame.draw.rect(screen, self.rectColor, [pos[0], pos[1], self.fontSize[0]*self.maxLength, self.fontSize[1]], 4)
+        screen.blit(stunText, (pos[0]+(self.getRemainingLen()+len(self.mainStr))*self.fontSize[0],pos[1]))
+        #screen.blit(blankText, pos)
         screen.blit(mainText, pos)
