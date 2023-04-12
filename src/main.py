@@ -48,6 +48,7 @@ def game():
     enemyOffset = 0
 
     enemyTypeInterval = 300
+    stunInterval = 1000
 
     running = True
     isKor = True
@@ -157,7 +158,8 @@ def game():
                 parryTextTime = 1
             if parryTime == 0: parryTime = 1
             if parrySuccess:
-                pass
+                enemyTextBox.addStunStr(enemyTextBox.getMainStr())
+                enemyOffset += stunInterval
             else:
                 myTextBox.addStunStr(enemyTextBox.getMainStr())
             enemyTextBox.setMainStr('')
