@@ -65,7 +65,6 @@ class textBox:
         self.mainColor = c
 
     def drawBox(self, screen, pos):
-        print(self.mainStr)
         allText = self.font.render(self.mainStr + ' ' * self.getRemainingLen() + self.stunStr, True, self.stunColor)
         mainText = self.font.render(self.mainStr, True, self.mainColor)
         pygame.draw.rect(screen, self.rectColor, [pos[0], pos[1], 710, self.font.size("a")[1]], 4)
