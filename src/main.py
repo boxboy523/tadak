@@ -46,12 +46,11 @@ def game(): ##페이커는 엄마가 없다.
 
     running = True
     isKor = True
-    
+    shiftPressed = False
 
     exceptChar = [pygame.K_BACKSPACE, pygame.K_RETURN, pygame.K_LSHIFT, pygame.K_RSHIFT, pygame.K_LALT, pygame.K_RALT] # 글자 아닌 키들 분류
 
     while running:
-        shiftPressed = False
         '''값 입력'''
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -59,33 +58,50 @@ def game(): ##페이커는 엄마가 없다.
 
             if event.type == pygame.KEYDOWN:
 
+                if event.key in [pygame.K_LALT, pygame.K_RALT]:
+                    isKor = not isKor
+
+                if event.key in [pygame.K_LSHIFT, pygame.K_RSHIFT]:
+                    shiftPressed = True
+
                 if event.key not in exceptChar:
-                    keyTuple = gameIME.getKey(event.key,isKor)
-                    if(keyTuple[1]):
-                        try: myTextBox.addStr(keyTuple[0])
-                        except: pass
-                    else:
-                        try:
-                            myTextBox.subStr(1)
-                            myTextBox.addStr(keyTuple[0])
-                        except: pass
-                    
-                    if(len(keyTuple) == 4):
-                        if(keyTuple[3]):
-                            try: myTextBox.addStr(keyTuple[2])
+                    try:
+                        c = chr(event.key)
+                        if shiftPressed and (97<=ord(c)<=122):
+                            c = c.upper()
+                        keyTuple = gameIME.getKey(c,isKor)
+                        if(keyTuple[1]):
+                            try: myTextBox.addStr(keyTuple[0])
                             except: pass
                         else:
                             try:
                                 myTextBox.subStr(1)
-                                myTextBox.addStr(keyTuple[2])
+                                myTextBox.addStr(keyTuple[0])
                             except: pass
+                        
+                        if(len(keyTuple) == 4):
+                            if(keyTuple[3]):
+                                try: myTextBox.addStr(keyTuple[2])
+                                except: pass
+                            else:
+                                try:
+                                    myTextBox.subStr(1)
+                                    myTextBox.addStr(keyTuple[2])
+                                except: pass
+                    except: pass
                 
-                if event.key in [pygame.K_LALT, pygame.K_RALT]:
-                    isKor = not isKor
+                
+
+            if event.type == pygame.KEYUP:
+                if event.key in [pygame.K_LSHIFT, pygame.K_RSHIFT]:
+                    shiftPressed = False
         '''벡스페이스'''
         if pygame.key.get_pressed()[pygame.K_BACKSPACE]:  # 벡스페이스 누르는 동안 bspc_t 증가
             if backspace_t ==0: 
+                bsp = gameIME.backSpace()
                 myTextBox.subStr(1)
+                if bsp != None:
+                    myTextBox.addStr(bsp)
             backspace_t += 1
         else:
             backspace_t = 0  # 떼면 초기화
@@ -151,43 +167,6 @@ def game(): ##페이커는 엄마가 없다.
 
         global_t += 1
 
-'''
-class textBox:
-    font = pygame.font.SysFont("arial", 50)
-    mainStr = ''
-    #frontStr = ''
-    color = (255,255,255)
-    whiteBar = False
-    def __init__(self, f, s='', fs='', c=(255,255,255)) -> None:
-        self.font = f
-        self.mainStr = s
-        #self.frontStr =fs
-        self.color = c
-
-    def setStr(self,s):
-        self.mainStr = s
-
-    def getStr(self):
-        return self.mainStr
-
-    def getLen(self):
-        return len(self.mainStr)
-    
-    def setColor(self,c):
-        self.color = c
-
-    def subStr(self,i):
-        self.mainStr = self.mainStr[:len(self.mainStr)-i]
-
-    def addStr(self,s):
-        self.mainStr += s
-
-
-    def drawBox(self,screen,pos):
-        text = self.font.render(self.mainStr, True, self.color)
-        pygame.draw.rect(screen, self.color, [pos[0],pos[1],300,self.font.size("a")[1]],4)
-        screen.blit(text, pos)
-    '''
 
 
 if __name__ == "__main__":

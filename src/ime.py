@@ -431,7 +431,7 @@ class IME:
     def getKey(self,c,isKor):
         '''
         키 입력을 받고 잘 처리해줌
-        @c: 입력받은 바이트
+        @c: 입력받은 문자
         @isKor: 입력이 한글인지 여부(한영키 여부)
         @return: (string, boolean) 작성중인 글자, 완료여부(True면 새 글자, False면 이전 글자 변경)를 튜플로 리턴
         * 튜플 길이가 4일 경우, 글자 2개가 한꺼번에 나와야 하는 경우
@@ -440,7 +440,7 @@ class IME:
             # 한글 아니면 기존입력 초기화하고 글자리턴
             self.resetState()
             return (c,True)
-        jm = engkey2kor(chr(c))
+        jm = engkey2kor(c)
         if jm == None:
             #자모음이 아니면 초기화하고 글자리턴
             self.resetState()
@@ -493,7 +493,7 @@ class IME:
                 new_jm = asm_jm(self.jung,jm)
                 if new_jm :  #이중모음 판별
                     self.state = 3 
-                    self.jung1=jung
+                    self.jung1=self.jung
                     self.jung2=jm
                     self.jung = new_jm
                     return (asm(self.cho,self.jung,self.jong), False)
@@ -541,7 +541,7 @@ class IME:
                 if new_jm and asm(self.cho,self.jung,self.jong): 
                     # 화면에 완성된 글자를 출력하고
                     # 상태는 5
-                    self.jong1=jong; self.jong2=jm
+                    self.jong1=self.jong; self.jong2=jm
                     self.jong=new_jm
                     self.state = 5
                     return (asm(self.cho,self.jung,self.jong), False)
@@ -563,7 +563,7 @@ class IME:
                 # input_list.append( asm(cho,jung,None) )
                 frontChar = asm(self.cho,self.jung,None)
                 self.state=2 
-                self.cho=jong; self.jung=jm; self.jong=None
+                self.cho=self.jong; self.jung=jm; self.jong=None
                 return (frontChar, False,  asm(self.cho,self.jung,self.jong), True)           
         elif self.state == 5: #--------------- 종성 이중자음까지 입력된 상태 
             if is_jaum(jm):
@@ -583,52 +583,53 @@ class IME:
                 # 상태는 2
                 #input_list.append( asm(cho,jung,jong1) )
                 frontChar = asm(self.cho,self.jung,self.jong1)
-                self.cho = jong2;self.jung = jm ;self.jong=None
+                self.cho = self.jong2;self.jung = jm ;self.jong=None
                 self.state = 2
                 return (frontChar, False, asm(self.cho,self.jung,self.jong), True)
 
-    def backSpace():
+    def backSpace(self):
         '''
         backspace를 누르면 호출되는 함수
         @return: string or None. string이면 가장 뒤 글자를 string으로 대체, None이면 글자를 지움
         '''
         
-        if state==0 :
+        if self.state==0 :
             # 아무것도 없으므로 걍 지우면된다.
             return None
                 
-        elif state==1:
+        elif self.state==1:
             # 초성 초기화
             # 상태0
-            state=0
-            cho=None
+            self.state=0
+            self.cho=None
             return None
-        elif state==2:
+        elif self.state==2:
             # 상태 1 
             # 중초기화
-            state=1
-            jung=None;
-            return asm(cho,jung,jong)
-        elif state==3:
+            self.state=1
+            self.jung=None
+            if self.cho == None: return None
+            return asm(self.cho,self.jung,self.jong)
+        elif self.state==3:
             # 상태2 
-            state=2
-            jung=jung1
-            jung1=None;jung2=None
-            return asm(cho,jung,jong)
-        elif state==4:
+            self.state=2
+            self.jung=jung1
+            self.jung1=None;self.jung2=None
+            return asm(self.cho,self.jung,self.jong)
+        elif self.state==4:
             # 상태2
             # 종초기화
-            state=2
-            jong=None
-            return asm(cho,jung,jong)
-        elif state==5:
+            self.state=2
+            self.jong=None
+            return asm(self.cho,self.jung,self.jong)
+        elif self.state==5:
             # 종1종2 초기화
             # 상태4
             # 상태2 
-            state=4
-            jong=jong1
-            jung1=None;jung2=None
-            return asm(cho,jung,jong)
+            self.state=4
+            self.jong=self.jong1
+            self.jung1=None;self.jung2=None
+            return asm(self.cho,self.jung,self.jong)
 
     def resetState(self):
         '''
