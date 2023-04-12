@@ -2,6 +2,7 @@ import pygame
 import random
 import time
 from textbox import textBox
+from textlog import textLog
 from ime import IME
 
 backSpaceThreshold = 100
@@ -16,8 +17,9 @@ def game():
     screen = pygame.display.set_mode((screen_width, screen_height))
     pygame.display.set_caption("TADAK")
 
-    myFont = pygame.font.SysFont("Nanum Gothic", 30)
-    myTextBox = textBox(myFont, ml=20)
+    myFont = pygame.font.SysFont("나눔고딕", 30)
+    myTextBox = textBox(myFont, ml=30)
+    myTextLog = textLog(myFont, grad=True, ml=30, utd = False)
     myAtk = ['토네이도', '사격', '파지직']
     myLeftBomb = 1
 
@@ -162,6 +164,7 @@ def game():
         parryText = myFont.render("PARRY!!", True, (255, 255, 255))
         prQ = myFont.render(parryStr, True, (255, 255, 255))
 
+        myTextLog.draw(screen, (100,400))
         myTextBox.drawBox(screen, (100, 400))
         enemyTextBox.drawBox(screen, (100, 100))
 
