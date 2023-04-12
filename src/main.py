@@ -17,7 +17,7 @@ def game(): ##페이커는 엄마가 없다.
     screen = pygame.display.set_mode((screen_width, screen_height))
     pygame.display.set_caption("TADAK")
 
-    myFont = pygame.font.SysFont("arial", 50)
+    myFont = pygame.font.SysFont("나눔고딕", 50)
     myTextBox = textBox(myFont ,c=(255,255,255))
     enemyTextBox = textBox(myFont, c=(255,255,255))
     enemyStr = ''
@@ -25,7 +25,7 @@ def game(): ##페이커는 엄마가 없다.
     currIdx = -1
     currAtk = ''
     atkSet = False
-    gameIME = IME
+    gameIME = IME()
 
     parryStr = ''
     canParry = False
@@ -60,9 +60,25 @@ def game(): ##페이커는 엄마가 없다.
             if event.type == pygame.KEYDOWN:
 
                 if event.key not in exceptChar:
-                    gameIME.getKey(event.key)
-                    try: myTextBox.addStr(chr(event.key))
-                    except: pass
+                    keyTuple = gameIME.getKey(event.key,isKor)
+                    if(keyTuple[1]):
+                        try: myTextBox.addStr(keyTuple[0])
+                        except: pass
+                    else:
+                        try:
+                            myTextBox.subStr(1)
+                            myTextBox.addStr(keyTuple[0])
+                        except: pass
+                    
+                    if(len(keyTuple) == 4):
+                        if(keyTuple[3]):
+                            try: myTextBox.addStr(keyTuple[2])
+                            except: pass
+                        else:
+                            try:
+                                myTextBox.subStr(1)
+                                myTextBox.addStr(keyTuple[2])
+                            except: pass
                 
                 if event.key in [pygame.K_LALT, pygame.K_RALT]:
                     isKor = not isKor
@@ -85,7 +101,7 @@ def game(): ##페이커는 엄마가 없다.
                 if parryTime == 0: parryTime = 1
                 myTextBox.setStr('')
         '''쉬프트'''
-        if pygame.key.get_pressed()[pygame.K_LSHIFT, pygame.K_RSHIFT]:
+        if pygame.key.get_pressed()[pygame.K_LSHIFT] or pygame.key.get_pressed()[pygame.K_RSHIFT]:
             shiftPressed = True
 
         

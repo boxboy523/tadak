@@ -425,13 +425,13 @@ class IME:
     jong1 = None  #이중자음 첫번째 자음
     jong2 = None  #이중자음 두번째 자음
 
-    def IME():
+    def IME(self):
         pass
 
     def getKey(self,c,isKor):
         '''
         키 입력을 받고 잘 처리해줌
-        @c: 입력받은 바이트코드
+        @c: 입력받은 바이트
         @isKor: 입력이 한글인지 여부(한영키 여부)
         @return: (string, boolean) 작성중인 글자, 완료여부(True면 새 글자, False면 이전 글자 변경)를 튜플로 리턴
         * 튜플 길이가 4일 경우, 글자 2개가 한꺼번에 나와야 하는 경우
@@ -440,7 +440,7 @@ class IME:
             # 한글 아니면 기존입력 초기화하고 글자리턴
             self.resetState()
             return (c,True)
-        jm = engkey2kor(c)
+        jm = engkey2kor(chr(c))
         if jm == None:
             #자모음이 아니면 초기화하고 글자리턴
             self.resetState()
