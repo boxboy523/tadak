@@ -16,11 +16,11 @@ def game():
     screen = pygame.display.set_mode((screen_width, screen_height))
     pygame.display.set_caption("TADAK")
 
-    myFont = pygame.font.SysFont("Nanum Gothic", 50)
-    myTextBox = textBox(myFont, 10)
+    myFont = pygame.font.SysFont("나눔고딕", 30)
+    myTextBox = textBox(myFont, ml=30)
     myAtk = ['토네이도', '사격', '파지직']
-
-    enemyTextBox = textBox(myFont)
+    enemyTextBox = textBox(myFont, ml=30)
+    enemyStr = ''
     enemyAtk = ['타격', '파이어볼', '지진', '눈보라', '이제간다아아앗']
     currIdx = -1
     currAtk = ''
