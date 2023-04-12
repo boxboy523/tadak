@@ -114,6 +114,7 @@ def game():
             backSpaceLatency = backSpaceLatencyInit
         '''엔터'''
         if pygame.key.get_pressed()[pygame.K_RETURN]:
+            gameIME = IME()  # 엔터 후 IME()를 리셋해야 한다.
             if myTextBox.getMainStr() != '':
                 parryStr = myTextBox.getMainStr()
                 if parryTime > 0 and enemyTextBox.getMainStr() == parryStr:
