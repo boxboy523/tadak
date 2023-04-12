@@ -139,7 +139,12 @@ def game():
                 parrySuccess = True
                 parryTextTime = 1
             if parryTime == 0: parryTime = 1
-            enemyTextBox.setMainStr('')  # 이거 뒤에도 조금 남아있어야 패링이 될듯
+            if parrySuccess:
+                pass
+            else:
+                myTextBox.addStunStr(enemyTextBox.mainStr)
+            enemyTextBox.setMainStr('')
+            parrySuccess = False
 
         screen.fill(pygame.Color("black"))
         parryText = myFont.render("PARRY!!", True, (255, 255, 255))
