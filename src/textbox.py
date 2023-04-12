@@ -5,7 +5,7 @@ class textBox:
     whiteBar = False
     screenColor = (0, 0, 0)
 
-    def __init__(self, f, ml=15, c=(255, 255, 255), sc=(255, 255, 0), ac=(0, 255, 255), rc=(255, 255, 255)) -> None:
+    def __init__(self, f, ml=15, c=(255, 255, 255), sc=(0, 0, 0),ss=(255,255,0), ac=(0, 255, 255), rc=(255, 255, 255)) -> None:
         self.font = f
         self.maxLength = ml  # 입력창의 길이
 
@@ -14,6 +14,7 @@ class textBox:
 
         self.mainColor = c  # 입력 텍스트 색깔 / 디폴트 : 하얀색
         self.stunColor = sc  # 스턴 텍스트 색깔 / 디폴트 : 노란색
+        self.stunScreen = ss
         self.actionColor = ac  # 명령어 완성 시 텍스트 색깔 / 디폴트 : 하늘색
         self.rectColor = rc  # 입력창 박스 색깔 / 디폴트 : 하얀색
         self.fontSize = self.font.size("가")
@@ -67,10 +68,12 @@ class textBox:
         self.mainColor = c
 
     def drawBox(self, screen, pos):
-        stunText = self.font.render(self.stunStr, True, self.stunColor)
+        stunText = self.font.render(self.stunStr, True, self.stunColor, self.stunScreen)
         #blankText = self.font.render(self.mainStr + '가' * self.getRemainingLen(), True, self.screenColor)
         mainText = self.font.render(self.mainStr, True, self.mainColor)
-        pygame.draw.rect(screen, self.rectColor, [pos[0], pos[1], self.fontSize[0]*self.maxLength, self.fontSize[1]], 4)
+        
         screen.blit(stunText, (pos[0]+(self.getRemainingLen()+len(self.mainStr))*self.fontSize[0],pos[1]))
         #screen.blit(blankText, pos)
         screen.blit(mainText, pos)
+
+        pygame.draw.rect(screen, self.rectColor, [pos[0]-4, pos[1]-4, self.fontSize[0]*self.maxLength+8, self.fontSize[1]+8], 4)
