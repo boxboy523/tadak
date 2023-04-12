@@ -80,9 +80,10 @@ class textBox:
     '''출력 메서드'''
 
 
-    def drawBox(self, screen, pos):
+    def drawBox(self, screen, pos, isValid):
         stunText = self.font.render(self.stunStr, True, self.stunColor, self.stunScreen)
-        mainText = self.font.render(self.mainStr, True, self.mainColor)
+        if isValid: mainText = self.font.render(self.mainStr, True, self.actionColor)
+        else: mainText = self.font.render(self.mainStr, True, self.mainColor)
         
         screen.blit(stunText, (pos[0]+(self.getLeftLen()+len(self.mainStr))*self.fontSize[0],pos[1]))
         screen.blit(mainText, pos)

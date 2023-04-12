@@ -17,10 +17,11 @@ def game():
     screen = pygame.display.set_mode((screen_width, screen_height))
     pygame.display.set_caption("TADAK")
 
-    myFont = pygame.font.SysFont("나눔고딕", 30)
-    myTextBox = textBox(myFont, ml=30)
+    myFont = pygame.font.SysFont("Nanum GOthic", 30)
+    myTextBox = textBox(myFont, ml=20)
     myTextLog = textLog(myFont, grad=True, ml=30, utd = False)
     myAtk = ['토네이도', '사격', '파지직']
+
     myLeftBomb = 1
 
     enemyTextBox = textBox(myFont, ml=30)
@@ -46,7 +47,7 @@ def game():
     backSpaceOffset = 0
     enemyOffset = 0
 
-    enemyTypeInterval = 400
+    enemyTypeInterval = 300
 
     running = True
     isKor = True
@@ -128,8 +129,10 @@ def game():
                 if parryTime == 0: parryTime = 1
                 '''행동 성공 시'''
                 if myTextBox.getMainStr() in myAtk:
+                    myTextLog.addLine(myTextBox.getMainStr())
                     enemyTextBox.addStunStr(myTextBox.getMainStr())
                 if myTextBox.getMainStr() == '폭탄':
+                    myTextLog.addLine(myTextBox.getMainStr())
                     if myLeftBomb > 0:
                         myLeftBomb -= 1
                         myTextBox.setStunStr('')
@@ -163,10 +166,19 @@ def game():
         screen.fill(pygame.Color("black"))
         parryText = myFont.render("PARRY!!", True, (255, 255, 255))
         prQ = myFont.render(parryStr, True, (255, 255, 255))
-
+        '''현재 상태'''
+        bombText = myFont.render("남은 폭탄 수 : " + str(myLeftBomb), True, (255, 255, 255))
+        screen.blit(bombText, (100,500))
+        '''가능한 행동 출력'''
+        s = ''
+        for atk in myAtk:
+            s += (atk + ' / ')
+        atkText = myFont.render(s[:len(s)-3], True, (0, 255, 255))
+        screen.blit(atkText, (400, 500))
+        '''그리기'''
         myTextLog.draw(screen, (100,400))
-        myTextBox.drawBox(screen, (100, 400))
-        enemyTextBox.drawBox(screen, (100, 100))
+        myTextBox.drawBox(screen, (100, 400), myTextBox.getMainStr() in myAtk)
+        enemyTextBox.drawBox(screen, (100, 100), enemyTextBox.getMainStr() in enemyAtk)
 
         if parryTime > 0:
             # screen.blit(prQ, (200, 150))
