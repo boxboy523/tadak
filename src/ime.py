@@ -92,6 +92,20 @@ def asm(cho,jung,jong):
         idx_jong = 0    
     return chr(idx_cho*21*28 + idx_jung*28 + idx_jong + 0xAC00)
 
+def get_jm(ch):
+    '''
+    한글 글자를 입력하면 자모를 분리해서 튜플로 리턴하는 함수
+    @return: (초성, 중성, 종성)
+    '''
+    unicode = ord(ch) - 0xAC00
+    idx_jong = unicode%28
+    unicode = unicode//28
+    idx_jung = unicode%21
+    unicode = unicode//21
+    idx_cho = unicode
+    return (CHO_DATA[idx_cho], JUNG_DATA[idx_jung], JONG_DATA[idx_jong])
+    
+
 def asm_jm(u_jm1,u_jm2):
     """이중자음/이중모음 유니코드 알아내기 
     
