@@ -60,39 +60,47 @@ class textBox:
 
     def getMainLen(self):
         return len(self.getMainStr())
+    
+    def getParried(self):
+        pass
 
-    def addMainStr(self, s):
+    def addMainStr(self, s, inputProperty = "MAIN"):
         numAdd = 0
         for currIdx in range(self.getMaxLength()):
             (text, property) = self.table[currIdx]
             if property == 'BLANK' and numAdd < len(s):
-                self.table[currIdx] = (s[numAdd], 'MAIN')
+                self.table[currIdx] = (s[numAdd], inputProperty)
                 numAdd += 1
         self.sortTable()
 
     def subMainStrFromLeft(self, i, subPreStun = False):  # 가장 왼쪽 i개의 문자를 제거함
         toRemove = i
+        textRemoved = []
         for currIdx in range(self.getMaxLength()):
             (text, property) = self.table[currIdx]
             if property == 'PRE_STUN' and not subPreStun:
                 break
             elif property == 'MAIN' and toRemove > 0:
+                textRemoved += self.table[currIdx]
                 self.table[currIdx] = ('궳', 'BLANK')
                 toRemove -= 1
         self.sortTable()
+        return textRemoved
 
     def subMainStrFromRight(self, i, subPreStun = False):  # 가장 오른쪽 i개의 문자를 제거함
         toRemove = i
+        textRemoved = []
         for curr in range(self.getMaxLength()):
             currIdx = (self.getMaxLength() - 1) - curr
             (text, property) = self.table[currIdx]
             if property == 'PRE_STUN' and not subPreStun:
                 break
             elif property == 'MAIN' and toRemove > 0:
+                textRemoved += self.table[currIdx]
                 self.table[currIdx] = ('궳', 'BLANK')
                 toRemove -= 1
         self.sortTable()
-
+        return textRemoved
     '''StunStr 관련 메서드'''
 
     def setStunStr(self, s):
@@ -139,22 +147,28 @@ class textBox:
 
     def subStunStrFromLeft(self, i):  # 가장 왼쪽 i개의 문자를 제거함
         toRemove = i
+        textRemoved = []
         for currIdx in range(self.getMaxLength()):
             (text, property) = self.table[currIdx]
             if property == 'STUN' and toRemove > 0:
+                textRemoved += self.table[currIdx]
                 self.table[currIdx] = ('궳', 'BLANK')
                 toRemove -= 1
         self.sortTable()
+        return textRemoved
 
     def subStunStrFromRight(self, i):  # 가장 오른쪽 i개의 문자를 제거함
         toRemove = i
+        textRemoved = []
         for curr in range(self.getMaxLength()):
             currIdx = (self.getMaxLength() - 1) - curr
             (text, property) = self.table[currIdx]
             if property == 'STUN' and toRemove > 0:
+                textRemoved += self.table[currIdx]
                 self.table[currIdx] = ('궳', 'BLANK')
                 toRemove -= 1
         self.sortTable()
+        return textRemoved
 
     '''테이블 정렬 메서드'''
     def sortTable(self):

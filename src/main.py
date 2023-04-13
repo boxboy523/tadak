@@ -36,7 +36,9 @@ def game():
 
     parryStr = ''
     canParry = False
-    parrySuccess = False
+    myParrySuccess = False
+    enemyParrySuccess = False
+    parryText = ''
     parryTime = 0
     parryLast = 2000 * (fps / 1000)
     parryTextTime = 0
@@ -44,6 +46,8 @@ def game():
 
     global_t = 0
     backSpace_t = 0
+    myLastInput_t = 0
+    enemyLastInput_t = 0
     backSpaceOffset = 0
     enemyOffset = 0
 
@@ -52,7 +56,7 @@ def game():
     backSpaceAcceleration = 5 * (fps / 1000)  # backSpaceLatency가 감소하는 양
     backSpaceLatency = backSpaceLatencyInit  # 글자 하나 지우는 데 드는 시간(ms)
 
-    enemyTypeInterval = 150 * (fps / 1000)
+    enemyTypeInterval = 500 * (fps / 1000)
     stunInterval = 1000 * (fps / 1000)
 
     running = True
@@ -80,6 +84,7 @@ def game():
                     shiftPressed = True
 
                 if event.key not in exceptChar:
+                    myLastInput_t = global_t
                     try:
                         c = chr(event.key)
                         if shiftPressed and (97 <= ord(c) <= 122):
@@ -178,6 +183,7 @@ def game():
 
         '''적 타이핑 수행'''
         if global_t - enemyOffset >= enemyTypeInterval:
+            enemyLastInput_t = global_t
             c = enemyLetter[enemyCurrIdx]
             keyTuple = enemyIME.getKey(c, True)
             if keyTuple[1]:
@@ -207,6 +213,18 @@ def game():
             enemyOffset += enemyTypeInterval
             enemyCurrIdx += 1
 
+        '''패리'''
+        myParrySuccess = False
+        enemyParrySuccess = False
+        if myTextBox.getMainLen() > 0 and enemyTextBox.getMainLen() > 0:
+            if myTextBox.getMainStr()[myTextBox.getMainLen() - 1] == enemyTextBox.getMainStr()[enemyTextBox.getMainLen() - 1]:
+                if myLastInput_t >= enemyLastInput_t:
+                    myParrySuccess = True
+                    enemyTextBox.getParried()
+                elif myLastInput_t < enemyLastInput_t:
+                    enemyParrySuccess = True
+                    myTextBox.getParried()
+
         global_t += 1
 
         '''화면 출력'''
@@ -227,6 +245,13 @@ def game():
                           myTextBox.getMainStr() in mySkillList)
         enemyTextBox.drawBox(screen, (100, 100),
                              enemyTextBox.getMainStr() in enemySkillList)
+        '''패리'''
+        if myParrySuccess: 
+            parryText = myFont.render("PARRY!", True, (255, 255, 255))
+            screen.blit(parryText, (350, 250))
+        if enemyParrySuccess: 
+            parryText = myFont.render("PARRIED...", True, (255, 255, 255))
+            screen.blit(parryText, (350, 250))
         '''승패 판정'''
         if myTextBox.getStunLen() == myTextBox.getMaxLength():
             gameOverText = myFont.render("죽었다...", True, (255, 255, 255))
