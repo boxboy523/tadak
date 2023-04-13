@@ -34,15 +34,11 @@ def game():
     enemyCurrSkill = ''
     enemySkillSet = False
 
-    parryStr = ''
-    canParry = False
     myParrySuccess = False
     enemyParrySuccess = False
     parryText = ''
-    parryTime = 0
-    parryLast = 2000 * (fps / 1000)
-    parryTextTime = 0
-    parryTextLast = 700 * (fps / 1000)
+    myParryThreshold = 300 * (fps / 1000)  # 내 Parry가 인정되는 시간의 상한(ms)
+    enemyParryThreshold = 300 * (fps / 1000)  # 상대의 Parry가 인정되는 시간의 상한(ms)
 
     global_t = 0
     backSpace_t = 0
@@ -51,13 +47,12 @@ def game():
     backSpaceOffset = 0
     enemyOffset = 0
 
-    backSpaceThreshold = 60 * (fps / 1000)  # backSpaceLatency의 하한
-    backSpaceLatencyInit = 80 * (fps / 1000)  # backSpaceLatency의 초기값
-    backSpaceAcceleration = 5 * (fps / 1000)  # backSpaceLatency가 감소하는 양
+    backSpaceThreshold = 60 * (fps / 1000)  # backSpaceLatency의 하한(ms)
+    backSpaceLatencyInit = 80 * (fps / 1000)  # backSpaceLatency의 초기값(ms)
+    backSpaceAcceleration = 5 * (fps / 1000)  # backSpaceLatency가 감소하는 양(ms)
     backSpaceLatency = backSpaceLatencyInit  # 글자 하나 지우는 데 드는 시간(ms)
 
-    enemyTypeInterval = 500 * (fps / 1000)
-    stunInterval = 1000 * (fps / 1000)
+    enemyTypeInterval = 500 * (fps / 1000)  # 상대가 음소 하나를 입력하는 데 걸리는 시간(ms)
 
     running = True
     isKor = True
@@ -216,12 +211,12 @@ def game():
         '''패리'''
         myParrySuccess = False
         enemyParrySuccess = False
-        if myTextBox.getMainLen() > 0 and enemyTextBox.getMainLen() > 0:
-            if myTextBox.getMainStr()[myTextBox.getMainLen() - 1] == enemyTextBox.getMainStr()[enemyTextBox.getMainLen() - 1]:
-                if myLastInput_t >= enemyLastInput_t:
+        if myTextBox.getLastText() == enemyTextBox.getLastText() and myTextBox.getLastText() != None:
+            if not ime.is_jaum(myTextBox.getLastText()):
+                if myLastInput_t >= enemyLastInput_t and myLastInput_t - enemyLastInput_t <= myParryThreshold:
                     myParrySuccess = True
                     enemyTextBox.getParried()
-                elif myLastInput_t < enemyLastInput_t:
+                elif myLastInput_t < enemyLastInput_t and enemyLastInput_t - myLastInput_t <= enemyParryThreshold:
                     enemyParrySuccess = True
                     myTextBox.getParried()
 

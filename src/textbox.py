@@ -61,6 +61,10 @@ class textBox:
     def getMainLen(self):
         return len(self.getMainStr())
     
+    def getLastText(self):
+        if self.getMainLen() == 0: return None
+        return self.getMainStr()[self.getMainLen() - 1]
+    
     def getParried(self):
         pass
 
