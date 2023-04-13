@@ -15,7 +15,7 @@ class textBox:
     def __init__(self, f, ml=15) -> None:
         self.font = f
         self.maxLength = ml  # 입력창의 길이
-        self.table = [('궳', 'BLANK')] * ml # 입력창 리스트
+        self.table = [('궳', 'BLANK')] * ml # 입력창의 문자를 모은 리스트. 개별 원소는 ('문자', '속성')의 꼴임.
         self.fontSize = self.font.size("가")
 
     '''Length 관련 메서드'''
