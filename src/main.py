@@ -5,10 +5,6 @@ from textbox import textBox
 from textlog import textLog
 from ime import IME
 
-backSpaceThreshold = 100
-backSpaceLatencyInit = 50  # 백스페이스를 꾹 눌렀을 때 각 글자가 지워지는 데 걸리는 시간
-backSpaceLatency = backSpaceLatencyInit
-
 pygame.init()
 
 def game():
@@ -47,7 +43,12 @@ def game():
     backSpaceOffset = 0
     enemyOffset = 0
 
-    enemyTypeInterval = 150 * (fps / 1000)
+    backSpaceThreshold = 60 * (fps / 1000) # backSpaceLatency의 하한
+    backSpaceLatencyInit = 80 * (fps / 1000) # backSpaceLatency의 초기값
+    backSpaceAcceleration = 5 * (fps / 1000) # backSpaceLatency가 감소하는 양
+    backSpaceLatency = backSpaceLatencyInit # 글자 하나 지우는 데 드는 시간(ms)
+
+    enemyTypeInterval = 500 * (fps / 1000)
     stunInterval = 1000 * (fps / 1000)
 
     running = True
@@ -60,7 +61,7 @@ def game():
     while running:
         '''글로벌 타임'''
         clock.tick(fps)
-        print(f"tick:{clock.tick(fps)}   fps:{clock.get_fps()}")
+        # print(f"tick:{clock.tick(fps)}   fps:{clock.get_fps()}") # fps 체크
         '''값 입력'''
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -149,10 +150,10 @@ def game():
             shiftPressed = True
         '''백스페이스 적용'''
         if myTextBox.getMainStr() != '':
-            if backSpace_t - backSpaceOffset >= backSpaceThreshold:
+            if backSpace_t - backSpaceOffset >= backSpaceLatency:
                 myTextBox.subMainStrFromRight(1)
                 backSpaceOffset += backSpaceLatency
-                backSpaceLatency = max(backSpaceLatencyInit // 2, backSpaceLatency - 10)
+                backSpaceLatency = max(backSpaceThreshold, backSpaceLatency - backSpaceAcceleration)
         '''적 행동 완료 및 재설정'''
         if not atkSet:
             currIdx = random.randint(0, len(enemyAtk) - 1)
