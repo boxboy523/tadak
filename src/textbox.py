@@ -111,6 +111,17 @@ class textBox:
 
     def addStunStr(self, s):
         stunText = self.getStunStr() + s
+        self.subMainStrFromRight(len(stunText) - self.getBlankLen())
+        self.subStunStrFromLeft(self.getMaxLength())
+        numAdd = 0
+        for currIdx in range(self.getMaxLength()):
+            (text, property) = self.table[currIdx]
+            if property == 'BLANK' and numAdd < len(stunText):
+                self.table[currIdx] = (stunText[numAdd], 'STUN')
+                numAdd += 1
+        self.sortTable()       
+        '''
+        stunText = self.getStunStr() + s
         self.subStunStrFromLeft(self.getMaxLength())
         numAdd = 0
         for currIdx in range(self.getMaxLength()):
@@ -124,6 +135,7 @@ class textBox:
                 self.table[currIdx] = (stunText[numAdd], 'STUN')
                 numAdd += 1
         self.sortTable()
+        '''
 
     def subStunStrFromLeft(self, i):  # 가장 왼쪽 i개의 문자를 제거함
         toRemove = i
