@@ -159,7 +159,10 @@ class IME:
             # 한글 아니면 기존입력 초기화하고 글자리턴
             self.resetState()
             return (c,True)
-        jm = engkey2kor(c)
+        if c in lower_to_jm or c in upper_to_jm:
+            jm = c
+        else:
+            jm = engkey2kor(c)
         if jm == None:
             #자모음이 아니면 초기화하고 글자리턴
             self.resetState()

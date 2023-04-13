@@ -1,17 +1,21 @@
 import pygame
 import random
 import time
+import ime
+
 from textbox import textBox
 from textlog import textLog
 from ime import IME
 
 pygame.init()
 
+
 def game():
     clock = pygame.time.Clock()
     fps = 60
-    
-    gameIME = IME()
+
+    myIME = IME()
+    enemyIME = IME()
 
     screen_width = 1000
     screen_height = 600
@@ -20,16 +24,15 @@ def game():
 
     myFont = pygame.font.SysFont("Nanum Gothic", 30)
     myTextBox = textBox(myFont, ml=20)
-    myTextLog = textLog(myFont, grad=True, ml=30, utd = False)
-    myAtk = ['토네이도', '사격', '파지직']
+    myTextLog = textLog(myFont, grad=True, ml=30, utd=False)
+    mySkillList = ['토네이도', '사격', '파지직']
     myLeftBomb = 1
 
     enemyTextBox = textBox(myFont, ml=30)
-    enemyStr = ''
-    enemyAtk = ['타격', '파이어볼', '지진', '눈보라', '이제간다아아앗']
-    currIdx = -1
-    currAtk = ''
-    atkSet = False
+    enemySkillList = ['타격', '파이어볼', '지진', '눈보라', '이제간다아아앗']
+    enemyCurrIdx = -1
+    enemyCurrSkill = ''
+    enemySkillSet = False
 
     parryStr = ''
     canParry = False
@@ -44,12 +47,12 @@ def game():
     backSpaceOffset = 0
     enemyOffset = 0
 
-    backSpaceThreshold = 60 * (fps / 1000) # backSpaceLatency의 하한
-    backSpaceLatencyInit = 80 * (fps / 1000) # backSpaceLatency의 초기값
-    backSpaceAcceleration = 5 * (fps / 1000) # backSpaceLatency가 감소하는 양
-    backSpaceLatency = backSpaceLatencyInit # 글자 하나 지우는 데 드는 시간(ms)
+    backSpaceThreshold = 60 * (fps / 1000)  # backSpaceLatency의 하한
+    backSpaceLatencyInit = 80 * (fps / 1000)  # backSpaceLatency의 초기값
+    backSpaceAcceleration = 5 * (fps / 1000)  # backSpaceLatency가 감소하는 양
+    backSpaceLatency = backSpaceLatencyInit  # 글자 하나 지우는 데 드는 시간(ms)
 
-    enemyTypeInterval = 500 * (fps / 1000)
+    enemyTypeInterval = 150 * (fps / 1000)
     stunInterval = 1000 * (fps / 1000)
 
     running = True
@@ -81,7 +84,7 @@ def game():
                         c = chr(event.key)
                         if shiftPressed and (97 <= ord(c) <= 122):
                             c = c.upper()
-                        keyTuple = gameIME.getKey(c, isKor)
+                        keyTuple = myIME.getKey(c, isKor)
                         if keyTuple[1]:
                             try:
                                 myTextBox.addMainStr(keyTuple[0])
@@ -115,7 +118,7 @@ def game():
         '''백스페이스'''
         if pygame.key.get_pressed()[pygame.K_BACKSPACE]:  # 백스페이스 누르는 동안 backSpace_t 증가
             if backSpace_t == 0:
-                bsp = gameIME.backSpace()
+                bsp = myIME.backSpace()
                 myTextBox.subMainStrFromRight(1)
                 if bsp is not None:
                     myTextBox.addMainStr(bsp)
@@ -126,16 +129,10 @@ def game():
             backSpaceLatency = backSpaceLatencyInit
         '''엔터'''
         if pygame.key.get_pressed()[pygame.K_RETURN]:
-            gameIME = IME()  # 엔터 후 IME()를 리셋해야 한다.
+            myIME.resetState()  # 엔터 후 IME()를 리셋해야 한다.
             if myTextBox.getMainStr() != '':
-                '''패리 판정'''
-                parryStr = myTextBox.getMainStr()
-                if parryTime > 0 and enemyTextBox.getMainStr() == parryStr:
-                    parrySuccess = True
-                    parryTextTime = 1
-                if parryTime == 0: parryTime = 1
                 '''행동 성공 시'''
-                if myTextBox.getMainStr() in myAtk:
+                if myTextBox.getMainStr() in mySkillList:
                     myTextLog.addLine(myTextBox.getMainStr())
                     enemyTextBox.addStunStr(myTextBox.getMainStr())
                 if myTextBox.getMainStr() == '폭탄':
@@ -155,51 +152,81 @@ def game():
                 myTextBox.subMainStrFromRight(1)
                 backSpaceOffset += backSpaceLatency
                 backSpaceLatency = max(backSpaceThreshold, backSpaceLatency - backSpaceAcceleration)
-        '''적 행동 완료 및 재설정'''
-        if not atkSet:
-            currIdx = random.randint(0, len(enemyAtk) - 1)
-            atkSet = True
-            if parryTime > 0 and enemyTextBox.getMainStr() == parryStr:
-                parrySuccess = True
-                parryTextTime = 1
-            if parryTime == 0: parryTime = 1
-            if parrySuccess:
-                enemyTextBox.addStunStr(enemyTextBox.getMainStr())
-                enemyOffset += stunInterval
-            else:
+                
+        '''적 행동 재설정'''
+        if not enemySkillSet:
+            enemyCurrSkill = enemySkillList[random.randint(
+                0, len(enemySkillList) - 1)]
+            enemyCurrIdx = 0
+            enemyLetter = ''
+            for i in range(len(enemyCurrSkill)):
+                (x, y, z) = ime.get_jm(enemyCurrSkill[i])
+                if z == ' ':
+                    enemyLetter += x + y
+                else:
+                    enemyLetter += x + y + z
+            enemySkillSet = True
+
+        '''적 행동 완료 체크'''
+        if enemyCurrIdx == len(enemyLetter) and global_t - enemyOffset >= enemyTypeInterval:
+            if enemyTextBox.getMainStr() in enemySkillList:
                 myTextBox.addStunStr(enemyTextBox.getMainStr())
+            enemyOffset += enemyTypeInterval
             enemyTextBox.setMainStr('')
-            parrySuccess = False
-        '''패리'''
+            enemyIME.resetState()
+            enemySkillSet = False
+
+        '''적 타이핑 수행'''
+        if global_t - enemyOffset >= enemyTypeInterval:
+            c = enemyLetter[enemyCurrIdx]
+            keyTuple = enemyIME.getKey(c, True)
+            if keyTuple[1]:
+                try:
+                    enemyTextBox.addMainStr(keyTuple[0])
+                except:
+                   pass
+            else:
+                try:
+                    enemyTextBox.subMainStrFromRight(1)
+                    enemyTextBox.addMainStr(keyTuple[0])
+                except:
+                    pass
+
+            if len(keyTuple) == 4:
+                if keyTuple[3]:
+                    try:
+                        enemyTextBox.addMainStr(keyTuple[2])
+                    except:
+                        pass
+                else:
+                    try:
+                        enemyTextBox.subMainStrFromRight(1)
+                        enemyTextBox.addMainStr(keyTuple[2])
+                    except:
+                        pass
+            enemyOffset += enemyTypeInterval
+            enemyCurrIdx += 1
+
+        global_t += 1
+
+        '''화면 출력'''
         screen.fill(pygame.Color("black"))
-        parryText = myFont.render("PARRY!!", True, (255, 255, 255))
-        prQ = myFont.render(parryStr, True, (255, 255, 255))
         '''현재 상태'''
-        bombText = myFont.render("남은 폭탄 수 : " + str(myLeftBomb), True, (255, 255, 255))
-        screen.blit(bombText, (100,500))
+        bombText = myFont.render(
+            "남은 폭탄 수 : " + str(myLeftBomb), True, (255, 255, 255))
+        screen.blit(bombText, (100, 500))
         '''가능한 행동 출력'''
         s = ''
-        for atk in myAtk:
+        for atk in mySkillList:
             s += (atk + ' / ')
         atkText = myFont.render(s[:len(s)-3], True, (0, 255, 255))
         screen.blit(atkText, (400, 500))
-        '''그리기'''
-        myTextLog.draw(screen, (100,400))
-        myTextBox.drawBox(screen, (100, 400), myTextBox.getMainStr() in myAtk)
-        enemyTextBox.drawBox(screen, (100, 100), enemyTextBox.getMainStr() in enemyAtk)
-
-        if parryTime > 0:
-            # screen.blit(prQ, (200, 150))
-            parryTime += 1
-        if parryTime > parryLast:
-            parryTime = 0
-            parryStr = ''
-
-        if parryTextTime > 0:
-            screen.blit(parryText, (350, 250))
-            parryTextTime += 1
-        if parryTextTime > parryTextLast: parryTextTime = 0
-
+        '''입력창'''
+        myTextLog.draw(screen, (100, 400))
+        myTextBox.drawBox(screen, (100, 400),
+                          myTextBox.getMainStr() in mySkillList)
+        enemyTextBox.drawBox(screen, (100, 100),
+                             enemyTextBox.getMainStr() in enemySkillList)
         '''승패 판정'''
         if myTextBox.getStunLen() == myTextBox.getMaxLength():
             gameOverText = myFont.render("죽었다...", True, (255, 255, 255))
@@ -216,14 +243,6 @@ def game():
             break
 
         pygame.display.update()
-
-        if global_t - enemyOffset >= enemyTypeInterval:
-            if enemyTextBox.getMainStr() == enemyAtk[currIdx]:
-                atkSet = False
-            enemyTextBox.setMainStr(enemyAtk[currIdx][:enemyTextBox.getMainLen() + 1])
-            enemyOffset += enemyTypeInterval
-
-        global_t += 1
 
 
 if __name__ == "__main__":
