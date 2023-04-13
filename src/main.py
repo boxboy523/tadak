@@ -17,7 +17,7 @@ def game():
     screen = pygame.display.set_mode((screen_width, screen_height))
     pygame.display.set_caption("TADAK")
 
-    myFont = pygame.font.SysFont("Nanum GOthic", 30)
+    myFont = pygame.font.SysFont("Nanum Gothic", 30)
     myTextBox = textBox(myFont, ml=20)
     myTextLog = textLog(myFont, grad=True, ml=30, utd = False)
     myAtk = ['토네이도', '사격', '파지직']
