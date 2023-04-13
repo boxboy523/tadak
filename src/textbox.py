@@ -5,18 +5,18 @@ class textBox:
     whiteBar = False
     screenColor = (0, 0, 0)
     rectColor = (255, 255, 255)
-    propertyToColor = {'MAIN' : ((255,255,255),(0, 0, 0)), 'PRE_STUN' : ((150, 150, 0),(0, 0, 0)), 'BLANK' : None, 'STUN' : ((0,0,0),(255, 255, 0))}
+    propertyToColor = {'NORMAL' : ((255,255,255),(0, 0, 0)), 'PARRIED' : ((255, 200, 0),(0, 0, 0)), 'BLANK' : None, 'STUNNED' : ((0,0,0),(255, 255, 0))}
     '''
         BLANK : 공백
-        MAIN : 입력 중인 텍스트
-        PRE_STUN : 입력 도중 스턴된 텍스트
-        STUN : 이미 스턴되어 오른쪽에 정렬된 텍스트
+        NORMAL : 입력 중인 텍스트
+        PARRIED : 패리된 텍스트
+        STUNNED : 이미 스턴되어 오른쪽에 정렬된 텍스트
     '''
     def __init__(self, f, ml=15) -> None:
         self.font = f
         self.maxLength = ml  # 입력창의 길이
         self.table = [('궳', 'BLANK')] * ml # 입력창의 문자를 모은 리스트. 개별 원소는 ('문자', '속성')의 꼴임.
-        self.fontSize = self.font.size("가")
+        self.fontSize = self.font.size('가')
 
     '''Length 관련 메서드'''
 
@@ -30,7 +30,7 @@ class textBox:
     def getSpareLen(self):  # StunStr 입력 시 사용 가능한 여유 공간을 반환함
         numSpare = 0
         for (text, property) in self.table:
-            if property == 'BLANK' or property == 'MAIN':
+            if property == 'BLANK' or property == 'NORMAL':
                 numSpare += 1
         return numSpare
 
@@ -54,7 +54,7 @@ class textBox:
     def getMainStr(self):
         s = ''
         for (text, property) in self.table:
-            if property == 'MAIN' or property == 'PRE_STUN':
+            if property == 'NORMAL' or property == 'PARRIED':
                 s += text
         return s
 
@@ -63,12 +63,9 @@ class textBox:
     
     def getLastText(self):
         if self.getMainLen() == 0: return None
-        return self.getMainStr()[self.getMainLen() - 1]
-    
-    def getParried(self):
-        pass
+        return self.table[self.getMainLen() - 1][0]
 
-    def addMainStr(self, s, inputProperty = "MAIN"):
+    def addMainStr(self, s, inputProperty = 'NORMAL'):
         numAdd = 0
         for currIdx in range(self.getMaxLength()):
             (text, property) = self.table[currIdx]
@@ -82,9 +79,9 @@ class textBox:
         textRemoved = []
         for currIdx in range(self.getMaxLength()):
             (text, property) = self.table[currIdx]
-            if property == 'PRE_STUN' and not subPreStun:
+            if property == 'PARRIED' and not subPreStun:
                 break
-            elif property == 'MAIN' and toRemove > 0:
+            elif (property == 'NORMAL' or property == 'PARRIED') and toRemove > 0:
                 textRemoved += self.table[currIdx]
                 self.table[currIdx] = ('궳', 'BLANK')
                 toRemove -= 1
@@ -97,14 +94,35 @@ class textBox:
         for curr in range(self.getMaxLength()):
             currIdx = (self.getMaxLength() - 1) - curr
             (text, property) = self.table[currIdx]
-            if property == 'PRE_STUN' and not subPreStun:
+            if property == 'PARRIED' and not subPreStun:
                 break
-            elif property == 'MAIN' and toRemove > 0:
+            elif (property == 'NORMAL' or property == 'PARRIED') and toRemove > 0:
                 textRemoved += self.table[currIdx]
                 self.table[currIdx] = ('궳', 'BLANK')
                 toRemove -= 1
         self.sortTable()
         return textRemoved
+    
+    '''Parry 관련 메서드'''
+    def parry(self):
+        self.subMainStrFromRight(1)
+
+    def isParried(self):
+        return self.table[self.getMainLen() - 1][1] == 'PARRIED'
+
+    def getParried(self):
+        L = self.subMainStrFromRight(1)
+        self.addMainStr(L[0][0], 'PARRIED')
+
+    def parryMinusNormal(self):
+        cnt = 0
+        for (text, property) in self.table:
+            if property == 'NORMAL':
+                cnt -= 1
+            if property == 'PARRIED':
+                cnt += 1
+        return cnt
+
     '''StunStr 관련 메서드'''
 
     def setStunStr(self, s):
@@ -114,7 +132,7 @@ class textBox:
     def getStunStr(self):
         s = ''
         for (text, property) in self.table:
-            if property == 'STUN':
+            if property == 'STUNNED':
                 s += text
         return s
 
@@ -123,13 +141,13 @@ class textBox:
 
     def addStunStr(self, s):
         stunText = self.getStunStr() + s
-        self.subMainStrFromRight(len(stunText) - self.getBlankLen())
+        self.subMainStrFromRight(len(s) - self.getBlankLen())
         self.subStunStrFromLeft(self.getMaxLength())
         numAdd = 0
         for currIdx in range(self.getMaxLength()):
             (text, property) = self.table[currIdx]
             if property == 'BLANK' and numAdd < len(stunText):
-                self.table[currIdx] = (stunText[numAdd], 'STUN')
+                self.table[currIdx] = (stunText[numAdd], 'STUNNED')
                 numAdd += 1
         self.sortTable()       
         '''
@@ -139,12 +157,12 @@ class textBox:
         for currIdx in range(self.getMaxLength()):
             (text, property) = self.table[currIdx]
             if property == 'BLANK' and numAdd < len(stunText):
-                self.table[currIdx] = (stunText[numAdd], 'STUN')
+                self.table[currIdx] = (stunText[numAdd], 'STUNNED')
                 numAdd += 1
         for currIdx in range(self.getMaxLength()):
             (text, property) = self.table[currIdx]
-            if (property == 'MAIN' or property == 'PRE_STUN') and numAdd < len(stunText):
-                self.table[currIdx] = (stunText[numAdd], 'STUN')
+            if (property == 'NORMAL' or property == 'PARRIED') and numAdd < len(stunText):
+                self.table[currIdx] = (stunText[numAdd], 'STUNNED')
                 numAdd += 1
         self.sortTable()
         '''
@@ -154,7 +172,7 @@ class textBox:
         textRemoved = []
         for currIdx in range(self.getMaxLength()):
             (text, property) = self.table[currIdx]
-            if property == 'STUN' and toRemove > 0:
+            if property == 'STUNNED' and toRemove > 0:
                 textRemoved += self.table[currIdx]
                 self.table[currIdx] = ('궳', 'BLANK')
                 toRemove -= 1
@@ -167,7 +185,7 @@ class textBox:
         for curr in range(self.getMaxLength()):
             currIdx = (self.getMaxLength() - 1) - curr
             (text, property) = self.table[currIdx]
-            if property == 'STUN' and toRemove > 0:
+            if property == 'STUNNED' and toRemove > 0:
                 textRemoved += self.table[currIdx]
                 self.table[currIdx] = ('궳', 'BLANK')
                 toRemove -= 1
@@ -179,7 +197,7 @@ class textBox:
         def propertyOrder(x1, x2):
             prop1 = x1[1]
             prop2 = x2[1]
-            propertyOrder = {'MAIN' : -1, 'PRE_STUN' : -1, 'BLANK' : 0, 'STUN' : 1}
+            propertyOrder = {'NORMAL' : -1, 'PARRIED' : -1, 'BLANK' : 0, 'STUNNED' : 1}
             return propertyOrder[prop1] - propertyOrder[prop2]
         
         self.table = sorted(self.table, key = cmp_to_key(propertyOrder))

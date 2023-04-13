@@ -29,7 +29,7 @@ def game():
     myLeftBomb = 1
 
     enemyTextBox = textBox(myFont, ml=30)
-    enemySkillList = ['타격', '파이어볼', '지진', '눈보라', '이제간다아아앗']
+    enemySkillList = ['지진']
     enemyCurrIdx = -1
     enemyCurrSkill = ''
     enemySkillSet = False
@@ -37,8 +37,8 @@ def game():
     myParrySuccess = False
     enemyParrySuccess = False
     parryText = ''
-    myParryThreshold = 300 * (fps / 1000)  # 내 Parry가 인정되는 시간의 상한(ms)
-    enemyParryThreshold = 300 * (fps / 1000)  # 상대의 Parry가 인정되는 시간의 상한(ms)
+    myParryThreshold = 150 * (fps / 1000)  # 내 Parry가 인정되는 시간의 상한(ms)
+    enemyParryThreshold = 150 * (fps / 1000)  # 상대의 Parry가 인정되는 시간의 상한(ms)
 
     global_t = 0
     backSpace_t = 0
@@ -52,7 +52,8 @@ def game():
     backSpaceAcceleration = 5 * (fps / 1000)  # backSpaceLatency가 감소하는 양(ms)
     backSpaceLatency = backSpaceLatencyInit  # 글자 하나 지우는 데 드는 시간(ms)
 
-    enemyTypeInterval = 500 * (fps / 1000)  # 상대가 음소 하나를 입력하는 데 걸리는 시간(ms)
+    enemyTypeInterval = 200 * (fps / 1000)  # 상대가 음소 하나를 입력하는 데 걸리는 시간(ms)
+    enemyTypeVarience = 50 * (fps / 1000) 
 
     running = True
     isKor = True
@@ -92,8 +93,8 @@ def game():
                                 pass
                         else:
                             try:
-                                myTextBox.subMainStrFromRight(1)
-                                myTextBox.addMainStr(keyTuple[0])
+                                property = myTextBox.subMainStrFromRight(1, True)[1]
+                                myTextBox.addMainStr(keyTuple[0], property)
                             except:
                                 pass
 
@@ -105,8 +106,8 @@ def game():
                                     pass
                             else:
                                 try:
-                                    myTextBox.subMainStrFromRight(1)
-                                    myTextBox.addMainStr(keyTuple[2])
+                                    property = myTextBox.subMainStrFromRight(1, True)[1]
+                                    myTextBox.addMainStr(keyTuple[2], property)
                                 except:
                                     pass
                     except:
@@ -169,9 +170,9 @@ def game():
 
         '''적 행동 완료 체크'''
         if enemyCurrIdx == len(enemyLetter) and global_t - enemyOffset >= enemyTypeInterval:
-            if enemyTextBox.getMainStr() in enemySkillList:
+            if enemyTextBox.getMainStr() in enemySkillList and enemyTextBox.parryMinusNormal() < 0:
                 myTextBox.addStunStr(enemyTextBox.getMainStr())
-            enemyOffset += enemyTypeInterval
+            enemyOffset += enemyTypeInterval + random.randrange(-1 * enemyTypeVarience, enemyTypeVarience + 1)
             enemyTextBox.setMainStr('')
             enemyIME.resetState()
             enemySkillSet = False
@@ -188,8 +189,8 @@ def game():
                    pass
             else:
                 try:
-                    enemyTextBox.subMainStrFromRight(1)
-                    enemyTextBox.addMainStr(keyTuple[0])
+                    property = enemyTextBox.subMainStrFromRight(1, True)[1]
+                    enemyTextBox.addMainStr(keyTuple[0], property)
                 except:
                     pass
 
@@ -201,8 +202,8 @@ def game():
                         pass
                 else:
                     try:
-                        enemyTextBox.subMainStrFromRight(1)
-                        enemyTextBox.addMainStr(keyTuple[2])
+                        property = enemyTextBox.subMainStrFromRight(1, True)[1]
+                        enemyTextBox.addMainStr(keyTuple[2], property)
                     except:
                         pass
             enemyOffset += enemyTypeInterval
@@ -212,12 +213,16 @@ def game():
         myParrySuccess = False
         enemyParrySuccess = False
         if myTextBox.getLastText() == enemyTextBox.getLastText() and myTextBox.getLastText() != None:  # 현재 뒷 글자가 겹치면 & 공백이 아니면
-            if not ime.is_jaum(myTextBox.getLastText()):  # 겹치는 글자가 단자음이 아니라면
+            if not ime.is_jaum(myTextBox.getLastText()) and not myTextBox.isParried() and not enemyTextBox.isParried():  # 겹치는 글자가 단자음이 아니라면
                 if myLastInput_t >= enemyLastInput_t and myLastInput_t - enemyLastInput_t <= myParryThreshold:
                     myParrySuccess = True
+                    myTextBox.parry()
+                    myIME.resetState()
                     enemyTextBox.getParried()
                 elif myLastInput_t < enemyLastInput_t and enemyLastInput_t - myLastInput_t <= enemyParryThreshold:
                     enemyParrySuccess = True
+                    enemyTextBox.parry()
+                    enemyIME.resetState()
                     myTextBox.getParried()
 
         global_t += 1
