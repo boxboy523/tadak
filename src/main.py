@@ -123,6 +123,7 @@ def game():
         if pygame.key.get_pressed()[pygame.K_RETURN]:
             gameIME = IME()  # 엔터 후 IME()를 리셋해야 한다.
             if myTextBox.getMainStr() != '':
+                '''패리 판정'''
                 parryStr = myTextBox.getMainStr()
                 if parryTime > 0 and enemyTextBox.getMainStr() == parryStr:
                     parrySuccess = True
@@ -194,7 +195,7 @@ def game():
             parryTextTime += 1
         if parryTextTime > parryTextLast: parryTextTime = 0
         '''승패 판정'''
-        if myTextBox.getStunLen() == myTextBox.maxLength:
+        if myTextBox.getStunLen() == myTextBox.getMaxLength():
             gameOverText = myFont.render("죽었다...", True, (255, 255, 255))
             screen.blit(gameOverText, (350, 250))
             pygame.display.update()

@@ -30,6 +30,9 @@ class textBox:
     def setMaxLength(self, i):
         self.maxLength = i
 
+    def getMaxLength(self):
+        return self.maxLength
+
     '''MainStr 관련 메서드'''
 
     def setMainStr(self, s):
