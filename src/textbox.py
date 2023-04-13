@@ -5,7 +5,7 @@ class textBox:
     whiteBar = False
     screenColor = (0, 0, 0)
     rectColor = (255, 255, 255)
-    colorDictionary = {'MAIN' : ((255,255,255),(0, 0, 0)), 'PRE_STUN' : ((150, 150, 0),(0, 0, 0)), 'BLANK' : None, 'STUN' : ((0,0,0),(255, 255, 0))}
+    propertyToColor = {'MAIN' : ((255,255,255),(0, 0, 0)), 'PRE_STUN' : ((150, 150, 0),(0, 0, 0)), 'BLANK' : None, 'STUN' : ((0,0,0),(255, 255, 0))}
     '''
         BLANK : 공백
         MAIN : 입력 중인 텍스트
@@ -158,18 +158,18 @@ class textBox:
 
     '''테이블 정렬 메서드'''
     def sortTable(self):
-        def propertyCompare(x1, x2):
+        def propertyOrder(x1, x2):
             prop1 = x1[1]
             prop2 = x2[1]
             propertyOrder = {'MAIN' : -1, 'PRE_STUN' : -1, 'BLANK' : 0, 'STUN' : 1}
             return propertyOrder[prop1] - propertyOrder[prop2]
         
-        self.table = sorted(self.table, key = cmp_to_key(propertyCompare))
+        self.table = sorted(self.table, key = cmp_to_key(propertyOrder))
 
     '''색 관련 메서드'''
 
     def getColor(self, property):
-        return self.colorDictionary[property]
+        return self.propertyToColor[property]
     
     '''출력 메서드'''
 
