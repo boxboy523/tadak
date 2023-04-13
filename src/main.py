@@ -10,6 +10,8 @@ pygame.init()
 def game():
     clock = pygame.time.Clock()
     fps = 60
+    
+    gameIME = IME()
 
     screen_width = 1000
     screen_height = 600
@@ -28,7 +30,6 @@ def game():
     currIdx = -1
     currAtk = ''
     atkSet = False
-    gameIME = IME()
 
     parryStr = ''
     canParry = False
