@@ -211,8 +211,8 @@ def game():
         '''패리'''
         myParrySuccess = False
         enemyParrySuccess = False
-        if myTextBox.getLastText() == enemyTextBox.getLastText() and myTextBox.getLastText() != None:
-            if not ime.is_jaum(myTextBox.getLastText()):
+        if myTextBox.getLastText() == enemyTextBox.getLastText() and myTextBox.getLastText() != None:  # 현재 뒷 글자가 겹치면 & 공백이 아니면
+            if not ime.is_jaum(myTextBox.getLastText()):  # 겹치는 글자가 단자음이 아니라면
                 if myLastInput_t >= enemyLastInput_t and myLastInput_t - enemyLastInput_t <= myParryThreshold:
                     myParrySuccess = True
                     enemyTextBox.getParried()
