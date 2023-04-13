@@ -12,6 +12,9 @@ backSpaceLatency = backSpaceLatencyInit
 pygame.init()
 
 def game():
+    clock = pygame.time.Clock()
+    fps = 60
+
     screen_width = 1000
     screen_height = 600
     screen = pygame.display.set_mode((screen_width, screen_height))
@@ -21,7 +24,6 @@ def game():
     myTextBox = textBox(myFont, ml=20)
     myTextLog = textLog(myFont, grad=True, ml=30, utd = False)
     myAtk = ['토네이도', '사격', '파지직']
-
     myLeftBomb = 1
 
     enemyTextBox = textBox(myFont, ml=30)
@@ -36,19 +38,17 @@ def game():
     canParry = False
     parrySuccess = False
     parryTime = 0
-    parryLast = 2000
-
+    parryLast = 2000 * (fps / 1000)
     parryTextTime = 0
-    parryTextLast = 700
+    parryTextLast = 700 * (fps / 1000)
 
     global_t = 0
-
     backSpace_t = 0
     backSpaceOffset = 0
     enemyOffset = 0
 
-    enemyTypeInterval = 300
-    stunInterval = 1000
+    enemyTypeInterval = 150 * (fps / 1000)
+    stunInterval = 1000 * (fps / 1000)
 
     running = True
     isKor = True
@@ -58,6 +58,9 @@ def game():
                   pygame.K_RALT]  # 글자 아닌 키들 분류
 
     while running:
+        '''글로벌 타임'''
+        clock.tick(fps)
+        print(f"tick:{clock.tick(fps)}   fps:{clock.get_fps()}")
         '''값 입력'''
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -194,6 +197,7 @@ def game():
             screen.blit(parryText, (350, 250))
             parryTextTime += 1
         if parryTextTime > parryTextLast: parryTextTime = 0
+
         '''승패 판정'''
         if myTextBox.getStunLen() == myTextBox.getMaxLength():
             gameOverText = myFont.render("죽었다...", True, (255, 255, 255))
