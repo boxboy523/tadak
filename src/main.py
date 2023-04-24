@@ -2,6 +2,7 @@ import pygame
 import random
 import time
 import ime
+import math
 
 from textbox import textBox
 from textlog import textLog
@@ -301,9 +302,9 @@ def game():
         screen.fill(pygame.Color("black"))
 
         '''HP 출력'''
-        myHpText = myFont.render("HP : " + str(-1 * int(-1 * myHp)), True, (255, 255, 255))
+        myHpText = myFont.render("HP : " + str(math.ceil(myHp)), True, (255, 255, 255))
         screen.blit(myHpText, (100, my_height))
-        enemyHpText = myFont.render("HP : " + str(-1 * int(-1 * enemyHp)), True, (255, 255, 255))
+        enemyHpText = myFont.render("HP : " + str(math.ceil(enemyHp)), True, (255, 255, 255))
         screen.blit(enemyHpText, (100, enemy_height))
 
         '''상태이상 출력'''
