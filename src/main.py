@@ -30,7 +30,7 @@ def game():
     myTextLog = textLog(myFont, grad=True, ml=30, utd=False)
     mySkillList = ['화염구', '불덩이작렬', '패리', '대규모냉각' , '볼트', '체인라이트닝']
     mySkillCoolDownDictionary = {'화염구': 500, '불덩이작렬' : 2000, '패리' : 200, '대규모냉각' : 1000, '볼트' : 300, '체인라이트닝' : 500}
-    mySkillDamageDictionary = {'화염구': 6, '불덩이작렬' : 20, '패리' : 0, '대규모냉각' : 8, '볼트' : 2, '체인라이트닝' : 12}
+    mySkillDamageDictionary = {'화염구': 6, '불덩이작렬' : 20, '패리' : -1, '대규모냉각' : 8, '볼트' : 2, '체인라이트닝' : 12}
     myHp = 30
 
     enemyTextBox = textBox(myFont, ml=12)
