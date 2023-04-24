@@ -67,7 +67,10 @@ def game():
     lateParryThreshold = 400
     enemyParryInterval = 1750
     myParryInterval = 750
-    myParryTextLifeTime = 0
+    myParryTextOffset = -9999
+    mySkillEffectOffset = -9999
+    myParryTextLifeTime = myParryInterval
+    mySkillEffectLifeTime = 500
 
     running = True
     isKor = True
@@ -185,7 +188,7 @@ def game():
                     enemyTextBox.setMainStr('')
                     enemyLeftStunTime = enemyParryInterval
                     myLeftStunTime = myParryInterval
-                    myParryTextLifeTime = myParryInterval
+                    myParryTextOffset = global_t
                 elif 0 < global_t - enemyLastInput_t < lateParryThreshold and isEnemyDoing:
                     isEnemyDoing = False
                     myHp -= enemySkillDamageDictionary[enemyTextBox.getMainStr()] // 2
@@ -218,8 +221,9 @@ def game():
             if myTextBox.getMainStr() == '체인라이트닝':
                 if not '감전' in enemyStatus:
                     enemyStatus['감전'] = 0
-                enemyStatus['감전'] += 3
+                enemyStatus['감전'] += 4
             
+            mySkillEffectOffset = global_t
             myTextBox.setMainStr('')
                 
         '''적 행동 재설정'''
@@ -290,9 +294,10 @@ def game():
         if '화상' in enemyStatus :
             enemyHp -= 0.8 * enemyStatus['화상'] / fps
         if '감전' in enemyStatus:
-            if enemyStatus['감전'] >= 4:
+            if enemyStatus['감전'] >= 5:
+                isEnemyDoing = False
                 del enemyStatus['감전']
-                enemyLeftStunTime += 1000
+                enemyLeftStunTime += 500
                 enemyTextBox.setMainStr('')
                 enemySkillSet = False
         if '동상' in enemyStatus:
@@ -330,8 +335,12 @@ def game():
         else:
             enemyTextBox.drawBox(screen, ((screen_width - enemyTextBox.fontSize[0] * enemyTextBox.getMaxLength()) / 2, enemy_height), enemyTextBox.getMainStr() in enemySkillList, enemyLeftStunTime > 0)
         
+        '''행동 이펙트'''
+        if global_t - mySkillEffectOffset < mySkillEffectLifeTime:
+            pass
+
         '''패리 출력'''
-        if myParryTextLifeTime > 0: 
+        if global_t - myParryTextOffset < myParryTextLifeTime: 
             parryText = myFont.render("패리!!", True, (255, 255, 0))
             screen.blit(parryText, (450, 250))
 
@@ -355,7 +364,6 @@ def game():
         global_frame += 1
         if myLeftStunTime > 0: myLeftStunTime -= 1000 / fps
         if enemyLeftStunTime > 0: enemyLeftStunTime -= 1000 / fps
-        if myParryTextLifeTime > 0: myParryTextLifeTime -= 1000 / fps
 
         pygame.display.update()
 
