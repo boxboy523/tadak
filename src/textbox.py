@@ -5,7 +5,7 @@ class textBox:
     whiteBar = False
     screenColor = (0, 0, 0)
     rectColor = (255, 255, 255)
-    propertyToColor = {'NORMAL' : ((255,255,255),(0, 0, 0)), 'PARRIED' : ((255, 200, 0),(0, 0, 0)), 'BLANK' : None, 'STUNNED' : ((0,0,0),(255, 255, 0))}
+    propertyToColor = {'NORMAL' : ((255,255,255),(0, 0, 0)), 'PARRIED' : ((255, 200, 0),(0, 0, 0)), 'BLANK' : None, 'ACTIVE' : ((0, 255, 255),(0, 0, 0)), 'STUNNED' : ((0,0,0),(255, 255, 0))}
     '''
         BLANK : 공백
         NORMAL : 입력 중인 텍스트
@@ -114,14 +114,17 @@ class textBox:
         L = self.subMainStrFromRight(1)
         self.addMainStr(L[0][0], 'PARRIED')
 
-    def parryMinusNormal(self):
+    def parryNum(self):
         cnt = 0
         for (text, property) in self.table:
-            if property == 'NORMAL':
-                cnt -= 1
             if property == 'PARRIED':
                 cnt += 1
         return cnt
+    
+    def getStunned(self):
+        s = self.getMainStr()
+        self.setMainStr('')
+        self.addStunStr(s)
 
     '''StunStr 관련 메서드'''
 
@@ -209,18 +212,24 @@ class textBox:
     
     '''출력 메서드'''
 
-    def drawBox(self, screen, pos, isValid):
+    def drawBox(self, screen, pos, isValid, isDoing):
         (x, y) = pos
+        x += self.fontSize[0] * (self.getMaxLength() - self.getMainLen()) / 2
         for (text, property) in self.table:
             if property == 'BLANK':
                 pass
             else:
-                (textColor, backgroundColor) = self.getColor(property)
+                if isValid:
+                    (textColor, backgroundColor) = self.getColor('ACTIVE')
+                else:
+                    (textColor, backgroundColor) = self.getColor(property)
                 toDraw = self.font.render(text, True, textColor, backgroundColor)
                 screen.blit(toDraw, (x, y))
             x += self.fontSize[0]
-        pygame.draw.rect(screen, self.rectColor, [pos[0]-4, pos[1]-4, self.fontSize[0]*self.getMaxLength()+8, self.fontSize[1]+8], 4)
-
+        if isDoing:
+            pygame.draw.rect(screen, self.screenColor, [pos[0]-4, pos[1]-4, self.fontSize[0]*self.getMaxLength()+8, self.fontSize[1]+8], 4)
+        else:
+            pygame.draw.rect(screen, self.rectColor, [pos[0]-4, pos[1]-4, self.fontSize[0]*self.getMaxLength()+8, self.fontSize[1]+8], 4)
         '''
         stunText = self.font.render(self.stunStr, True, self.stunColor, self.stunScreen)
         if isValid: mainText = self.font.render(self.mainStr, True, self.actionColor)
