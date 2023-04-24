@@ -29,8 +29,8 @@ def game():
     myTextBox = textBox(myFont, ml=12)
     myTextLog = textLog(myFont, grad=True, ml=30, utd=False)
     mySkillList = ['화염구', '불덩이작렬', '패리', '대규모냉각' , '볼트', '체인라이트닝']
-    mySkillCoolDownDictionary = {'화염구': 500, '불덩이작렬' : 2000, '패리' : 200, '대규모냉각' : 1000, '볼트' : 300, '체인라이트닝' : 500}
-    mySkillDamageDictionary = {'화염구': 6, '불덩이작렬' : 20, '패리' : -1, '대규모냉각' : 8, '볼트' : 2, '체인라이트닝' : 12}
+    mySkillCoolDownDictionary = {'화염구': 600, '불덩이작렬' : 2000, '패리' : 200, '대규모냉각' : 1000, '볼트' : 300, '체인라이트닝' : 500}
+    mySkillDamageDictionary = {'화염구': 6, '불덩이작렬' : 20, '패리' : 0, '대규모냉각' : 8, '볼트' : 2, '체인라이트닝' : 12}
     myHp = 30
 
     enemyTextBox = textBox(myFont, ml=12)
@@ -43,6 +43,7 @@ def game():
     enemyStatus = dict()
 
     global_t = 0
+    global_frame = 0
     backSpace_t = 0
     backSpaceOffset = 0
     enemyOffset = 0
@@ -63,8 +64,8 @@ def game():
 
     justParryThreshold = 200
     lateParryThreshold = 400
-    enemyParryInterval = 1500
-    myParryInterval = 500
+    enemyParryInterval = 1750
+    myParryInterval = 750
     myParryTextLifeTime = 0
 
     running = True
@@ -280,7 +281,8 @@ def game():
         '''적 행동 완료 체크'''
         if enemyLeftStunTime <= 0 and isEnemyDoing:
             isEnemyDoing = False
-            myHp -= enemySkillDamageDictionary[enemyTextBox.getMainStr()]
+            if enemyTextBox.getMainStr() in enemySkillList:
+                myHp -= enemySkillDamageDictionary[enemyTextBox.getMainStr()]
             enemyTextBox.setMainStr('')
 
         '''상태이상'''
@@ -299,9 +301,9 @@ def game():
         screen.fill(pygame.Color("black"))
 
         '''HP 출력'''
-        myHpText = myFont.render("HP : " + str(int(myHp)), True, (255, 255, 255))
+        myHpText = myFont.render("HP : " + str(-1 * int(-1 * myHp)), True, (255, 255, 255))
         screen.blit(myHpText, (100, my_height))
-        enemyHpText = myFont.render("HP : " + str(int(enemyHp)), True, (255, 255, 255))
+        enemyHpText = myFont.render("HP : " + str(-1 * int(-1 * enemyHp)), True, (255, 255, 255))
         screen.blit(enemyHpText, (100, enemy_height))
 
         '''상태이상 출력'''
@@ -313,10 +315,10 @@ def game():
         for atk in mySkillList:
             s += (atk + ' / ')
         atkText = myFontSmall.render(s[:len(s)-3], True, (0, 255, 255))
-        screen.blit(atkText, (300, 505))
+        screen.blit(atkText, (400, 550))
 
         '''로그 및 입력창 출력'''
-        myTextLog.draw(screen, (750, 400))
+        myTextLog.draw(screen, (800, 400))
         if isMyDoing:
             myTextBox.drawBox(screen, ((screen_width - myTextBox.fontSize[0] * myTextBox.getMaxLength()) / 2, my_height * (myLeftStunTime / myDoingInterval)**4 + enemy_height * (1 - (myLeftStunTime / myDoingInterval)**4)), myTextBox.getMainStr() in mySkillList, myLeftStunTime > 0)
         else:
@@ -329,8 +331,8 @@ def game():
         
         '''패리 출력'''
         if myParryTextLifeTime > 0: 
-            parryText = myFont.render("패리!!", True, (255, 255, 255))
-            screen.blit(parryText, (350, 250))
+            parryText = myFont.render("패리!!", True, (255, 255, 0))
+            screen.blit(parryText, (450, 250))
 
         '''승패 판정 출력'''
         if myHp <= 0:
@@ -349,6 +351,7 @@ def game():
         '''시간 변경'''
 
         global_t += 1000 / fps
+        global_frame += 1
         if myLeftStunTime > 0: myLeftStunTime -= 1000 / fps
         if enemyLeftStunTime > 0: enemyLeftStunTime -= 1000 / fps
         if myParryTextLifeTime > 0: myParryTextLifeTime -= 1000 / fps
