@@ -25,8 +25,8 @@ def game():
     screen = pygame.display.set_mode((screen_width, screen_height))
     pygame.display.set_caption("TADAK")
 
-    myFont = pygame.font.SysFont("Nanum Gothic", 30)
-    myFontSmall = pygame.font.SysFont("Nanum Gothic", 20)
+    myFont = pygame.font.Font("font/DungGeunMo.ttf", 30)
+    myFontSmall = pygame.font.Font("font/DungGeunMo.ttf", 20)
     myTextBox = textBox(myFont, ml=12)
     myTextLog = textLog(myFont, grad=True, ml=30, utd=False)
     mySkillList = ['화염구', '불덩이작렬', '패리', '대규모냉각' , '볼트', '체인라이트닝']
