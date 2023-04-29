@@ -1,30 +1,33 @@
-class textLog:
-    logList = []
-    screenColor = (0, 0, 0)
+import object
 
-    def __init__(self, f, c = (255,255,255), sc = (0,0,0), ml = 15,s = 7, grad = True, utd = True) -> None:
-        self.font = f
-        self.mainColor = c 
-        self.maxLength = ml
-        self.screenColor = sc
-        self.gradation = grad
-        self.upToDown = utd
-        self.size = s
-        self.fontSize = self.font.size("가")
+class textLog(object):
+    _logList = []
+    _screenColor = (0, 0, 0)
+
+    def __init__(self, pos, scene, f, c = (255,255,255), sc = (0,0,0), ml = 15,s = 7, grad = True, utd = True) -> None:
+        super().__init__(pos,scene)
+        self._font = f
+        self._mainColor = c 
+        self._maxLength = ml
+        self._screenColor = sc
+        self._gradation = grad
+        self._upToDown = utd
+        self._size = s
+        self._fontSize = self._font.size("가")
 
     def addLine(self,s):
-        self.logList.insert(0,s)
-        if len(self.logList) > self.size:
-            self.logList.pop()
+        self._logList.insert(0,s)
+        if len(self._logList) > self.size:
+            self._logList.pop()
 
-    def draw(self, screen, pos):
-        color = self.mainColor
+    def draw(self):
+        color = self._mainColor
         l = self.size
-        for i in range(len(self.logList)):
-            if self.gradation:
-                color = (self.mainColor[0]*(l-i)/l,self.mainColor[1]*(l-i)/l,self.mainColor[2]*(l-i)/l)
-            text = self.font.render(self.logList[i], True, color, self.screenColor)
-            if self.upToDown:
-                screen.blit(text, (pos[0],pos[1]+i*self.fontSize[1]))
+        for i in range(len(self._logList)):
+            if self._gradation:
+                color = (self._mainColor[0]*(l-i)/l,self._mainColor[1]*(l-i)/l,self._mainColor[2]*(l-i)/l)
+            text = self._font.render(self._logList[i], True, color, self._screenColor)
+            if self._upToDown:
+                self.getScreen().blit(text, (self._pos[0],self._pos[1]+i*self._fontSize[1]))
             else:
-                screen.blit(text, (pos[0],pos[1]-(i+1)*self.fontSize[1]))
+                self.getScreen().blit(text, (self._pos[0],self._pos[1]-(i+1)*self._fontSize[1]))

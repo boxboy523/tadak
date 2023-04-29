@@ -1,18 +1,23 @@
 import pygame
 from functools import cmp_to_key
+import object
 
-class textBox:
+class textBox(object):
     whiteBar = False
     screenColor = (0, 0, 0)
     rectColor = (255, 255, 255)
-    propertyToColor = {'NORMAL' : ((255,255,255),(0, 0, 0)), 'PARRIED' : ((255, 200, 0),(0, 0, 0)), 'BLANK' : None, 'ACTIVE' : ((0, 255, 255),(0, 0, 0)), 'STUNNED' : ((0,0,0),(255, 255, 0))}
-    '''
-        BLANK : 공백
-        NORMAL : 입력 중인 텍스트
-        PARRIED : 패리된 텍스트
-        STUNNED : 이미 스턴되어 오른쪽에 정렬된 텍스트
-    '''
-    def __init__(self, f, ml=15) -> None:
+    isValid = False
+    isMoving = False
+    propertyToColor = {
+        'NORMAL' : ((255,255,255),(0, 0, 0)),   # 입력 중인 텍스트
+        'PARRIED' : ((255, 200, 0),(0, 0, 0)),  # 패리된 텍스트
+        'BLANK' : None,                         # 공백
+        'ACTIVE' : ((0, 255, 255),(0, 0, 0)), 
+        'STUNNED' : ((0,0,0),(255, 255, 0))     # 이미 스턴되어 오른쪽에 정렬된 텍스트
+    }
+
+    def __init__(self, p, s, f, ml=15) -> None:
+        super().__init__(p, s)
         self.font = f
         self.maxLength = ml  # 입력창의 길이
         self.table = [('궳', 'BLANK')] * ml # 입력창의 문자를 모은 리스트. 개별 원소는 ('문자', '속성')의 꼴임.
@@ -212,31 +217,31 @@ class textBox:
     
     '''출력 메서드'''
 
-    def drawBox(self, screen, pos, isValid, isDoing):
-        (x, y) = pos
+    def draw(self):
+        (x, y) = self._pos
         x += self.fontSize[0] * (self.getMaxLength() - self.getMainLen()) / 2
         for (text, property) in self.table:
             if property == 'BLANK':
                 pass
             else:
-                if isValid:
+                if self.isValid:
                     (textColor, backgroundColor) = self.getColor('ACTIVE')
                 else:
                     (textColor, backgroundColor) = self.getColor(property)
                 toDraw = self.font.render(text, True, textColor, backgroundColor)
-                screen.blit(toDraw, (x, y))
+                self.getScreen().blit(toDraw, (x, y))
             x += self.fontSize[0]
-        if isDoing:
-            pygame.draw.rect(screen, self.screenColor, [pos[0]-4, pos[1]-4, self.fontSize[0]*self.getMaxLength()+8, self.fontSize[1]+8], 4)
+        if self.isMoving:
+            pygame.draw.rect(self.getScreen(), self.screenColor, [self._pos[0]-4, self._pos[1]-4, self.fontSize[0]*self.getMaxLength()+8, self.fontSize[1]+8], 4)
         else:
-            pygame.draw.rect(screen, self.rectColor, [pos[0]-4, pos[1]-4, self.fontSize[0]*self.getMaxLength()+8, self.fontSize[1]+8], 4)
+            pygame.draw.rect(self.getScreen(), self.rectColor, [self._pos[0]-4, self._pos[1]-4, self.fontSize[0]*self.getMaxLength()+8, self.fontSize[1]+8], 4)
         '''
-        stunText = self.font.render(self.stunStr, True, self.stunColor, self.stunScreen)
+        stunText = self.font.render(self.stunStr, True, self.stunColor, self.stunself.getScreen())
         if isValid: mainText = self.font.render(self.mainStr, True, self.actionColor)
         else: mainText = self.font.render(self.mainStr, True, self.mainColor)
     
-        screen.blit(stunText, (pos[0]+(self.getBlankLen()+len(self.mainStr))*self.fontSize[0],pos[1]))
-        screen.blit(mainText, pos)
+        self.getScreen().blit(stunText, (self._pos[0]+(self.getBlankLen()+len(self.mainStr))*self.fontSize[0],self._pos[1]))
+        self.getScreen().blit(mainText, self._pos)
 
-        pygame.draw.rect(screen, self.rectColor, [pos[0]-4, pos[1]-4, self.fontSize[0]*self.maxLength+8, self.fontSize[1]+8], 4)
+        pygame.draw.rect(self.getScreen(), self.rectColor, [self._pos[0]-4, self._pos[1]-4, self.fontSize[0]*self.maxLength+8, self.fontSize[1]+8], 4)
         '''
