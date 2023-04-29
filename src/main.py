@@ -3,6 +3,7 @@ import random
 import time
 import ime
 import math
+import scene
 
 from textbox import textBox
 from textlog import textLog
@@ -24,6 +25,7 @@ def game():
     enemy_height = 100
     screen = pygame.display.set_mode((screen_width, screen_height))
     pygame.display.set_caption("TADAK")
+    myScene = scene(screen)
 
     myFont = pygame.font.Font("font/DungGeunMo.ttf", 30)
     myFontSmall = pygame.font.Font("font/DungGeunMo.ttf", 20)
@@ -48,7 +50,7 @@ def game():
     backSpace_t = 0
     backSpaceOffset = 0
     enemyOffset = 0
-    isMyDoing = False
+    keyAvailable = False
     isEnemyDoing = False
     myLeftStunTime = 0
     enemyLeftStunTime = 0
@@ -89,7 +91,7 @@ def game():
 
         '''값 입력'''
         for event in pygame.event.get():
-            if isMyDoing:
+            if keyAvailable:
                 break
 
             if event.type == pygame.QUIT:
@@ -142,7 +144,7 @@ def game():
                     shiftPressed = False
 
         '''백스페이스'''
-        if pygame.key.get_pressed()[pygame.K_BACKSPACE] and not isMyDoing:  # 백스페이스 누르는 동안 backSpace_t 증가
+        if pygame.key.get_pressed()[pygame.K_BACKSPACE] and not keyAvailable:  # 백스페이스 누르는 동안 backSpace_t 증가
             if backSpace_t == 0:
                 bsp = myIME.backSpace()
                 myTextBox.subMainStrFromRight(1)
@@ -155,7 +157,7 @@ def game():
             backSpaceLatency = backSpaceLatencyInit
 
         '''엔터'''
-        if pygame.key.get_pressed()[pygame.K_RETURN] and not isMyDoing:
+        if pygame.key.get_pressed()[pygame.K_RETURN] and not keyAvailable:
             myIME.resetState()  # 엔터 후 IME()를 리셋해야 한다.
             if myTextBox.getMainStr() != '':
                 '''행동 성공 시'''
@@ -163,12 +165,12 @@ def game():
                     myTextLog.addLine(myTextBox.getMainStr())
                     myDoingInterval = mySkillCoolDownDictionary[myTextBox.getMainStr()]
                     myLeftStunTime += myDoingInterval
-                    isMyDoing = True
+                    keyAvailable = True
                 else:
                     myTextBox.setMainStr('')
 
         '''쉬프트'''
-        if pygame.key.get_pressed()[pygame.K_LSHIFT] or pygame.key.get_pressed()[pygame.K_RSHIFT] and not isMyDoing:            shiftPressed = True
+        if pygame.key.get_pressed()[pygame.K_LSHIFT] or pygame.key.get_pressed()[pygame.K_RSHIFT] and not keyAvailable:            shiftPressed = True
 
         '''지우기 실행'''
         if myTextBox.getMainStr() != '':
@@ -178,8 +180,8 @@ def game():
                 backSpaceLatency = max(backSpaceThreshold, backSpaceLatency - backSpaceAcceleration)
 
         '''내 행동 완료 체크'''
-        if myLeftStunTime <= 0 and isMyDoing:
-            isMyDoing = False
+        if myLeftStunTime <= 0 and keyAvailable:
+            keyAvailable = False
             enemyHp -= mySkillDamageDictionary[myTextBox.getMainStr()]
 
             if myTextBox.getMainStr() == '패리':
@@ -325,15 +327,15 @@ def game():
 
         '''로그 및 입력창 출력'''
         myTextLog.draw(screen, (800, 400))
-        if isMyDoing:
-            myTextBox.drawBox(screen, ((screen_width - myTextBox.fontSize[0] * myTextBox.getMaxLength()) / 2, my_height * (myLeftStunTime / myDoingInterval)**4 + enemy_height * (1 - (myLeftStunTime / myDoingInterval)**4)), myTextBox.getMainStr() in mySkillList, myLeftStunTime > 0)
+        if keyAvailable:
+            myTextBox.draw(, myTextBox.getMainStr() in mySkillList, myLeftStunTime > 0)
         else:
-            myTextBox.drawBox(screen, ((screen_width - myTextBox.fontSize[0] * myTextBox.getMaxLength()) / 2, my_height), myTextBox.getMainStr() in mySkillList, myLeftStunTime > 0)
+            myTextBox.draw(((screen_width - myTextBox.fontSize[0] * myTextBox.getMaxLength()) / 2, my_height), myTextBox.getMainStr() in mySkillList, myLeftStunTime > 0)
         
         if isEnemyDoing:
-            enemyTextBox.drawBox(screen, ((screen_width - enemyTextBox.fontSize[0] * enemyTextBox.getMaxLength()) / 2, enemy_height * (enemyLeftStunTime / enemyDoingInterval)**4 + my_height * (1 - (enemyLeftStunTime / enemyDoingInterval)**4)), enemyTextBox.getMainStr() in enemySkillList, enemyLeftStunTime > 0)
+            enemyTextBox.draw(((screen_width - enemyTextBox.fontSize[0] * enemyTextBox.getMaxLength()) / 2, enemy_height * (enemyLeftStunTime / enemyDoingInterval)**4 + my_height * (1 - (enemyLeftStunTime / enemyDoingInterval)**4)), enemyTextBox.getMainStr() in enemySkillList, enemyLeftStunTime > 0)
         else:
-            enemyTextBox.drawBox(screen, ((screen_width - enemyTextBox.fontSize[0] * enemyTextBox.getMaxLength()) / 2, enemy_height), enemyTextBox.getMainStr() in enemySkillList, enemyLeftStunTime > 0)
+            enemyTextBox.draw(((screen_width - enemyTextBox.fontSize[0] * enemyTextBox.getMaxLength()) / 2, enemy_height), enemyTextBox.getMainStr() in enemySkillList, enemyLeftStunTime > 0)
         
         '''행동 이펙트'''
         if global_t - mySkillEffectOffset < mySkillEffectLifeTime:
