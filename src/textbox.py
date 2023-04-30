@@ -23,7 +23,7 @@ class textBox(object):
 
     '''Length 관련 메서드'''
 
-    def getBlankLen(self):  # MainStr 입력 시 사용 가능한 여유 공간을 반환함
+    def getBlankLen(self):  # Str 입력 시 사용 가능한 여유 공간을 반환함
         cnt = 0
         for (text, property) in self.table:
             if property == 'BLANK':
@@ -41,26 +41,22 @@ class textBox(object):
     def getMaxLength(self):
         return self.maxLength
 
-    '''MainStr 관련 메서드'''
-    def setMainStr(self, s):
-        self.subMainStrFromRight(self.getMaxLength())
-        self.addMainStr(s)
+    '''Str 관련 메서드'''
+    def setStr(self, s):
+        self.subStrFromRight(self.getMaxLength())
+        self.addStr(s)
 
-    def getMainStr(self):
+    def getStr(self):
         s = ''
         for (text, prop) in self.table:
             if prop != 'BLANK':
                 s += text
         return s
 
-    def getMainLen(self):
-        return len(self.getMainStr())
-    
-    def getLastText(self):
-        if self.getMainLen() == 0: return None
-        return self.table[self.getMainLen() - 1][0]
+    def getLen(self):
+        return len(self.getStr())
 
-    def addMainStr(self, s, propNew = 'NORMAL'):
+    def addStr(self, s, propNew = 'NORMAL'):
         addCnt = 0
         for i in range(self.getMaxLength()):
             (text, prop) = self.table[i]
@@ -68,7 +64,7 @@ class textBox(object):
                 self.table[i] = (s[addCnt], propNew)
                 addCnt += 1
 
-    def subMainStrFromLeft(self, k):  # 가장 왼쪽 k개의 문자를 제거하고 제거한 문자열 반환함
+    def subStrFromLeft(self, k):  # 가장 왼쪽 k개의 문자를 제거하고 제거한 문자열 반환함
         removeCnt = 0
         removedText = []
         for i in range(self.getMaxLength()):
@@ -81,7 +77,7 @@ class textBox(object):
 
         return removedText
 
-    def subMainStrFromRight(self, k):  # 가장 오른쪽 k개의 문자를 제거하고 제거한 문자열 반환함
+    def subStrFromRight(self, k):  # 가장 오른쪽 k개의 문자를 제거하고 제거한 문자열 반환함
         removeCnt = 0
         removedText = []
         for i in range(self.getMaxLength()-1, -1, -1):
@@ -99,7 +95,7 @@ class textBox(object):
         return self.propertyToColor[property]
     
     def checkVaild(self, list):
-        self.isValid = self.getMainStr() in list
+        self.isValid = self.getStr() in list
 
     '''
     테이블 정렬 메서드
@@ -115,7 +111,7 @@ class textBox(object):
     '''출력 메서드'''
     def draw(self):
         (x, y) = self._pos
-        x += self.fontSize[0] * (self.getMaxLength() - self.getMainLen()) / 2
+        x += self.fontSize[0] * (self.getMaxLength() - self.getLen()) / 2
         for (text, property) in self.table:
             if property == 'BLANK':
                 pass
