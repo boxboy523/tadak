@@ -87,13 +87,13 @@ def game():
             'WIGGLE' : 0,
             'FREQUENCY' : 300
         },
-        '명상' : {
+        '명상하기' : {
             'COOLDOWN' : 2000,
             'DAMAGE' : 0,
             'WIGGLE' : 0,
             'FREQUENCY' : 300
         },
-        '집중' : {
+        '집중하기' : {
             'COOLDOWN' : 2000,
             'DAMAGE' : 0,
             'WIGGLE' : 0,
@@ -364,13 +364,13 @@ def game():
                 if not '맹독' in myStatus:
                     myStatus['맹독'] = 0
                 myStatus['맹독'] += 1
-            if enemyTextBox.getStr() == '명상':
+            if enemyTextBox.getStr() == '명상하기':
                 if not '명상' in enemyStatus:
                     enemyStatus['명상'] = 0
                 enemyStatus['명상'] += 1
                 enemyTypeInterval /= 1.5
                 enemyTypeVarience /= 1.5
-            if enemyTextBox.getStr() == '집중':
+            if enemyTextBox.getStr() == '집중하기':
                 if not '집중' in enemyStatus:
                     enemyStatus['집중'] = 0
                 enemyStatus['집중'] += 1
