@@ -82,9 +82,9 @@ class textBox(object):
         removeCnt = 0
         removedText = []
         for i in range(self.getMaxLength()-1, -1, -1):
-            (text, property) = self.table[i]
+            (text, prop) = self.table[i]
 
-            if property == 'NORMAL' and removeCnt < k:
+            if prop == 'NORMAL' and removeCnt < k:
                 removedText += self.table[i]
                 self.table[i] = ('궳', 'BLANK')
                 removeCnt += 1
@@ -101,7 +101,7 @@ class textBox(object):
     
     def addSkill(self):
         pass
-    
+
     def delSkill(self):
         pass
 

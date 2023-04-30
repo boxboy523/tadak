@@ -86,7 +86,6 @@ def game():
     enemyCurrIdx = -1
     enemySkillSet = False
     enemyHp = 100
-    enemyStatus = dict()
 
     global_t = 0
     global_frame = 0
@@ -94,9 +93,12 @@ def game():
     backSpaceOffset = 0
     enemyOffset = 0
     keyAvailable = True
+    enemyLastInput_t = 0
+
     myLeftStunTime = 0
     enemyLeftStunTime = 0
-    enemyLastInput_t = 0
+
+    enemyStatus = dict()
 
     backSpaceThreshold = 100 # backSpaceLatency의 하한(ms)
     backSpaceLatencyInit = 150 # backSpaceLatency의 초기값(ms)
@@ -112,9 +114,7 @@ def game():
     enemyParryInterval = 1750
     myParryInterval = 750
     myParryTextOffset = -9999
-    mySkillEffectOffset = -9999
     myParryTextLifeTime = myParryInterval
-    mySkillEffectLifeTime = 500
 
     running = True
     isKor = True
@@ -267,7 +267,6 @@ def game():
                     enemyStatus['감전'] = 0
                 enemyStatus['감전'] += 4
             
-            mySkillEffectOffset = global_t
             myTextBox.setStr('')
                 
         '''적 행동 재설정'''
@@ -306,7 +305,7 @@ def game():
                    pass
             else:
                 try:
-                    property = enemyTextBox.delStrFromRight(1)
+                    enemyTextBox.delStrFromRight(1)
                     enemyTextBox.addStr(keyTuple[0])
                 except:
                     pass
@@ -379,10 +378,6 @@ def game():
 
         '''로그 및 입력창 출력'''
         myScene.draw()
-
-        '''행동 이펙트'''
-        if global_t - mySkillEffectOffset < mySkillEffectLifeTime:
-            pass
 
         '''패리 출력'''
         if global_t - myParryTextOffset < myParryTextLifeTime: 
