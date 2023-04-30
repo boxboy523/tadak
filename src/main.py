@@ -81,15 +81,27 @@ def game():
             'WIGGLE' : 0,
             'FREQUENCY' : 1
         },
-        '방패던지기' : {
-            'COOLDOWN' : 500,
-            'DAMAGE' : 5,
+        '맹독뱉기' : {
+            'COOLDOWN' : 400,
+            'DAMAGE' : 2,
+            'WIGGLE' : 0,
+            'FREQUENCY' : 300
+        },
+        '명상' : {
+            'COOLDOWN' : 2000,
+            'DAMAGE' : 0,
+            'WIGGLE' : 0,
+            'FREQUENCY' : 300
+        },
+        '집중' : {
+            'COOLDOWN' : 2000,
+            'DAMAGE' : 0,
             'WIGGLE' : 0,
             'FREQUENCY' : 300
         },
         '이제간다아아앗' : {
             'COOLDOWN' : 1200,
-            'DAMAGE' : 7,
+            'DAMAGE' : 10,
             'WIGGLE' : 70,
             'FREQUENCY' : 300
         }
@@ -100,12 +112,12 @@ def game():
     myTextBox = textBox((myTextBox_initX,myTextBox_initY), myScene, myFont, mySkillDict, 12)
     myTextLog = textLog((800,myTextBox_initY), myScene, myFont, grad=True, ml=30, utd=False)
 
-    myHp = 30
+    myHp = 50
 
     enemyTextBox = textBox((myTextBox_initX,enemyTextBox_initY), myScene, myFont, enemySkillDict, 12)
     enemyCurrIdx = -1
     enemySkillSet = False
-    enemyHp = 100
+    enemyHp = 150
 
     global_t = 0
     global_frame = 0
@@ -118,6 +130,7 @@ def game():
     myLeftStunTime = 0
     enemyLeftStunTime = 0
 
+    myStatus = dict()
     enemyStatus = dict()
 
     backSpaceThreshold = 100 # backSpaceLatency의 하한(ms)
@@ -256,14 +269,14 @@ def game():
             if myTextBox.getStr() == '화염구':
                 if not '화상' in enemyStatus:
                     enemyStatus['화상'] = 0
-                if enemyStatus['화상'] < 5:
+                if enemyStatus['화상'] < 3:
                     enemyStatus['화상'] += 1
 
             if myTextBox.getStr() == '불덩이작렬':
                 if not '화상' in enemyStatus:
                     enemyStatus['화상'] = 0
-                if enemyStatus['화상'] < 5:
-                    enemyStatus['화상'] += 2
+                if enemyStatus['화상'] < 3:
+                    enemyStatus['화상'] += 1
                 enemyLeftStunTime += 300
                 
             if myTextBox.getStr() == '대규모냉각':
@@ -284,7 +297,8 @@ def game():
             myTextBox.setStr('')
                 
         '''적 행동 재설정'''
-        if not enemySkillSet:
+        if not enemySkillSet and not enemyTextBox.isMoving:
+            enemyOffset = global_t
             enemyCurrSkill = random.choice(list(enemyTextBox.skillDictionary.keys()))
             enemyCurrIdx = 0
             enemyLetter = ''
@@ -297,19 +311,22 @@ def game():
             enemySkillSet = True
 
         '''적 행동 수행 체크'''
-        if enemyCurrIdx == len(enemyLetter) and global_t - enemyOffset >= enemyTypeInterval / 3:
+        if enemySkillSet and not enemyTextBox.isMoving and enemyCurrIdx == len(enemyLetter) and global_t - enemyOffset >= enemyTypeInterval / 3:
             enemyLastInput_t = global_t
             '''적 행동 성공시'''
             if enemyTextBox.isValid():
-                enemyMovingInterval = enemyTextBox.skillDictionary[enemyTextBox.getStr()]['COOLDOWN']
+                if '집중' in enemyStatus:
+                    enemyMovingInterval = enemyTextBox.skillDictionary[enemyTextBox.getStr()]['COOLDOWN'] * (0.66) ** enemyStatus['집중']
+                else:
+                    enemyMovingInterval = enemyTextBox.skillDictionary[enemyTextBox.getStr()]['COOLDOWN']
                 enemyLeftStunTime += enemyMovingInterval
                 enemyTextBox.isMoving = True
-            enemyOffset += enemyTypeInterval + random.randrange(-1 * enemyTypeVarience, enemyTypeVarience + 1)
+            enemyOffset += enemyTypeInterval + random.randrange(int(-1 * enemyTypeVarience), int(enemyTypeVarience) + 1)
             enemyIME.resetState()
             enemySkillSet = False
 
         '''적 타이핑 수행'''
-        if global_t - enemyOffset >= enemyTypeInterval:
+        if global_t - enemyOffset >= enemyTypeInterval and enemySkillSet and not enemyTextBox.isMoving:
             c = enemyLetter[enemyCurrIdx]
             keyTuple = enemyIME.getKey(c, True)
             if keyTuple[1]:
@@ -343,6 +360,21 @@ def game():
         if enemyLeftStunTime <= 0 and enemyTextBox.isMoving:
             enemyTextBox.isMoving = False
             myHp -= enemyTextBox.skillDictionary[enemyTextBox.getStr()]['DAMAGE']
+            if enemyTextBox.getStr() == '맹독뱉기':
+                if not '맹독' in myStatus:
+                    myStatus['맹독'] = 0
+                myStatus['맹독'] += 1
+            if enemyTextBox.getStr() == '명상':
+                if not '명상' in enemyStatus:
+                    enemyStatus['명상'] = 0
+                enemyStatus['명상'] += 1
+                enemyTypeInterval /= 1.5
+                enemyTypeVarience /= 1.5
+            if enemyTextBox.getStr() == '집중':
+                if not '집중' in enemyStatus:
+                    enemyStatus['집중'] = 0
+                enemyStatus['집중'] += 1
+
             enemyTextBox.setStr('')
 
         '''상태이상'''
@@ -358,6 +390,8 @@ def game():
                 enemySkillSet = False
         if '동상' in enemyStatus:
             enemyTypeInterval = (2 - (0.8)**enemyStatus['동상']) * enemyTypeIntervalInit
+        if '맹독' in myStatus:
+            myHp -= 0.4 * myStatus['맹독'] / fps
 
         '''입력창 Moving 시 pos 변경'''
         if myTextBox.isMoving:
