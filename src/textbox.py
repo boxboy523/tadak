@@ -6,7 +6,6 @@ class textBox(object):
     whiteBar = False
     screenColor = (0, 0, 0)
     rectColor = (255, 255, 255)
-    isValid = False
     isMoving = False
     propertyToColor = {
         'NORMAL' : ((255,255,255),(0, 0, 0)),   # 입력 중인 텍스트
@@ -14,12 +13,13 @@ class textBox(object):
         'ACTIVE' : ((0, 255, 255),(0, 0, 0)),
     }
 
-    def __init__(self, p, s, f, ml=15) -> None:
+    def __init__(self, p, s, f, d, ml=15) -> None:
         super().__init__(p, s)
         self.font = f
         self.maxLength = ml  # 입력창의 길이
         self.table = [('궳', 'BLANK')] * ml # 입력창의 문자를 모은 리스트. 개별 원소는 ('문자', '속성')의 꼴임.
         self.fontSize = self.font.size('가')
+        self.skillDictionary = d
 
     '''Length 관련 메서드'''
 
@@ -42,6 +42,7 @@ class textBox(object):
         return self.maxLength
 
     '''Str 관련 메서드'''
+
     def setStr(self, s):
         self.delStrFromRight(self.getMaxLength())
         self.addStr(s)
@@ -93,9 +94,16 @@ class textBox(object):
     '''색 관련 메서드'''
     def getColor(self, property):
         return self.propertyToColor[property]
+
+    '''Dictionary 관련 메서드'''
+    def isValid(self):
+        return self.getStr() in self.skillDictionary
     
-    def checkVaild(self, list):
-        self.isValid = self.getStr() in list
+    def addSkill(self):
+        pass
+    
+    def delSkill(self):
+        pass
 
     '''
     테이블 정렬 메서드
@@ -116,7 +124,7 @@ class textBox(object):
             if property == 'BLANK':
                 pass
             else:
-                if self.isValid:
+                if self.isValid():
                     (textColor, backgroundColor) = self.getColor('ACTIVE')
                 else:
                     (textColor, backgroundColor) = self.getColor(property)
