@@ -11,7 +11,6 @@ from ime import IME
 
 pygame.init()
 
-
 def game():
     clock = pygame.time.Clock()
     fps = 60
@@ -25,18 +24,18 @@ def game():
     enemy_height = 100
     screen = pygame.display.set_mode((screen_width, screen_height))
     pygame.display.set_caption("TADAK")
-    myScene = scene(screen)
+    myScene = scene.scene(screen)
 
     myFont = pygame.font.Font("font/DungGeunMo.ttf", 30)
     myFontSmall = pygame.font.Font("font/DungGeunMo.ttf", 20)
-    myTextBox = textBox(myFont, ml=12)
-    myTextLog = textLog(myFont, grad=True, ml=30, utd=False)
+    myTextBox = textBox((300,my_height), myScene, myFont, 12)
+    myTextLog = textLog((600,500), myScene, myFont, grad=True, ml=30, utd=False)
     mySkillList = ['화염구', '불덩이작렬', '패리', '대규모냉각' , '볼트', '체인라이트닝']
     mySkillCoolDownDictionary = {'화염구': 600, '불덩이작렬' : 2000, '패리' : 200, '대규모냉각' : 1000, '볼트' : 300, '체인라이트닝' : 500}
     mySkillDamageDictionary = {'화염구': 6, '불덩이작렬' : 20, '패리' : 0, '대규모냉각' : 8, '볼트' : 2, '체인라이트닝' : 12}
     myHp = 30
 
-    enemyTextBox = textBox(myFont, ml=12)
+    enemyTextBox = textBox((300,enemy_height), myScene, myFont, 12)
     enemySkillList = ['전투강타', '돌진', '방패던지기', '이제간다아아아아앗']
     enemySkillCoolDownDictionary = {'전투강타' : 800, '돌진' : 300, '방패던지기' : 500, '이제간다아아아아앗' : 1200}
     enemySkillDamageDictionary = {'전투강타' : 4, '돌진' : 2, '방패던지기' : 5, '이제간다아아아아앗' : 9}
@@ -159,15 +158,14 @@ def game():
         '''엔터'''
         if pygame.key.get_pressed()[pygame.K_RETURN] and not keyAvailable:
             myIME.resetState()  # 엔터 후 IME()를 리셋해야 한다.
-            if myTextBox.getMainStr() != '':
-                '''행동 성공 시'''
-                if myTextBox.getMainStr() in mySkillList:
-                    myTextLog.addLine(myTextBox.getMainStr())
-                    myDoingInterval = mySkillCoolDownDictionary[myTextBox.getMainStr()]
-                    myLeftStunTime += myDoingInterval
-                    keyAvailable = True
-                else:
-                    myTextBox.setMainStr('')
+            '''행동 성공 시'''
+            if myTextBox.getMainStr() in mySkillList:
+                myTextLog.addLine(myTextBox.getMainStr())
+                myDoingInterval = mySkillCoolDownDictionary[myTextBox.getMainStr()]
+                myLeftStunTime += myDoingInterval
+                keyAvailable = True
+            else:
+                myTextBox.setMainStr('')
 
         '''쉬프트'''
         if pygame.key.get_pressed()[pygame.K_LSHIFT] or pygame.key.get_pressed()[pygame.K_RSHIFT] and not keyAvailable:            shiftPressed = True
@@ -326,17 +324,8 @@ def game():
         screen.blit(atkText, (400, 550))
 
         '''로그 및 입력창 출력'''
-        myTextLog.draw(screen, (800, 400))
-        if keyAvailable:
-            myTextBox.draw(, myTextBox.getMainStr() in mySkillList, myLeftStunTime > 0)
-        else:
-            myTextBox.draw(((screen_width - myTextBox.fontSize[0] * myTextBox.getMaxLength()) / 2, my_height), myTextBox.getMainStr() in mySkillList, myLeftStunTime > 0)
-        
-        if isEnemyDoing:
-            enemyTextBox.draw(((screen_width - enemyTextBox.fontSize[0] * enemyTextBox.getMaxLength()) / 2, enemy_height * (enemyLeftStunTime / enemyDoingInterval)**4 + my_height * (1 - (enemyLeftStunTime / enemyDoingInterval)**4)), enemyTextBox.getMainStr() in enemySkillList, enemyLeftStunTime > 0)
-        else:
-            enemyTextBox.draw(((screen_width - enemyTextBox.fontSize[0] * enemyTextBox.getMaxLength()) / 2, enemy_height), enemyTextBox.getMainStr() in enemySkillList, enemyLeftStunTime > 0)
-        
+        myScene.draw()
+
         '''행동 이펙트'''
         if global_t - mySkillEffectOffset < mySkillEffectLifeTime:
             pass
@@ -368,7 +357,6 @@ def game():
         if enemyLeftStunTime > 0: enemyLeftStunTime -= 1000 / fps
 
         pygame.display.update()
-
 
 if __name__ == "__main__":
     game()

@@ -1,10 +1,10 @@
-import object
+from object import object
 
 class textLog(object):
     _logList = []
     _screenColor = (0, 0, 0)
 
-    def __init__(self, pos, scene, f, c = (255,255,255), sc = (0,0,0), ml = 15,s = 7, grad = True, utd = True) -> None:
+    def __init__(self, pos, scene, f, c = (255,255,255), sc = (0,0,0), ml = 15, s = 7, grad = True, utd = True) -> None:
         super().__init__(pos,scene)
         self._font = f
         self._mainColor = c 
@@ -22,7 +22,7 @@ class textLog(object):
 
     def draw(self):
         color = self._mainColor
-        l = self.size
+        l = self._size
         for i in range(len(self._logList)):
             if self._gradation:
                 color = (self._mainColor[0]*(l-i)/l,self._mainColor[1]*(l-i)/l,self._mainColor[2]*(l-i)/l)

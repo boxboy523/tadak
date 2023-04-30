@@ -11,8 +11,9 @@ class scene:
         del(self._objects[obj.getId()])
     
     def draw(self):
-        for o in self._objects:
-            o.draw()
+        for id in self._objects:
+            obj = self._objects[id]
+            obj.draw()
 
     def getScreen(self):
         return self._screen

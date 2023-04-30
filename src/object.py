@@ -23,7 +23,7 @@ class object:
         self._pos = (x,y)
 
     def getScreen(self):
-        self.s.getScreen()
+        return self._scene.getScreen()
 
     def draw(self):
         pass
