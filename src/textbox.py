@@ -43,7 +43,7 @@ class textBox(object):
 
     '''Str 관련 메서드'''
     def setStr(self, s):
-        self.subStrFromRight(self.getMaxLength())
+        self.delStrFromRight(self.getMaxLength())
         self.addStr(s)
 
     def getStr(self):
@@ -64,7 +64,7 @@ class textBox(object):
                 self.table[i] = (s[addCnt], propNew)
                 addCnt += 1
 
-    def subStrFromLeft(self, k):  # 가장 왼쪽 k개의 문자를 제거하고 제거한 문자열 반환함
+    def delStrFromLeft(self, k):  # 가장 왼쪽 k개의 문자를 제거하고 제거한 문자열 반환함
         removeCnt = 0
         removedText = []
         for i in range(self.getMaxLength()):
@@ -77,7 +77,7 @@ class textBox(object):
 
         return removedText
 
-    def subStrFromRight(self, k):  # 가장 오른쪽 k개의 문자를 제거하고 제거한 문자열 반환함
+    def delStrFromRight(self, k):  # 가장 오른쪽 k개의 문자를 제거하고 제거한 문자열 반환함
         removeCnt = 0
         removedText = []
         for i in range(self.getMaxLength()-1, -1, -1):

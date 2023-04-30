@@ -33,15 +33,56 @@ def game():
     myFontSmall = pygame.font.Font("font/DungGeunMo.ttf", 20)
     myTextBox = textBox((myTextBox_initX,myTextBox_initY), myScene, myFont, 12)
     myTextLog = textLog((800,myTextBox_initY), myScene, myFont, grad=True, ml=30, utd=False)
-    mySkillList = ['화염구', '불덩이작렬', '패리', '대규모냉각' , '볼트', '체인라이트닝']
-    mySkillCoolDownDictionary = {'화염구': 600, '불덩이작렬' : 2000, '패리' : 200, '대규모냉각' : 1000, '볼트' : 300, '체인라이트닝' : 500}
-    mySkillDamageDictionary = {'화염구': 6, '불덩이작렬' : 20, '패리' : 0, '대규모냉각' : 8, '볼트' : 2, '체인라이트닝' : 12}
+
+    mySkillDictionary = {
+        '화염구' : {
+            'COOLDOWN' : 600,
+            'DAMAGE' : 6
+        },
+        '불덩이작렬' : {
+            'COOLDOWN' : 2000,
+            'DAMAGE' : 20 
+        },
+        '패리' : {
+            'COOLDOWN' : 200,
+            'DAMAGE' : 0 
+        },
+        '대규모냉각' : {
+            'COOLDOWN' : 1000,
+            'DAMAGE' : 8 
+        },
+        '볼트' : {
+            'COOLDOWN' : 300,
+            'DAMAGE' : 2
+        },
+        '체인라이트닝' : {
+            'COOLDOWN' : 500,
+            'DAMAGE' : 12
+        }
+    }
+
+    enemySkillDictionary = {
+        '전투강타' : {
+            'COOLDOWN' : 800,
+            'DAMAGE' : 4
+        },
+        '돌진' : {
+            'COOLDOWN' : 300,
+            'DAMAGE' : 2
+        },
+        '방패던지기' : {
+            'COOLDOWN' : 500,
+            'DAMAGE' : 5
+        },
+        '이제간다아아앗' : {
+            'COOLDOWN' : 1200,
+            'DAMAGE' : 7
+        }
+    }
+
     myHp = 30
 
     enemyTextBox = textBox((myTextBox_initX,enemyTextBox_initY), myScene, myFont, 12)
-    enemySkillList = ['전투강타', '돌진', '방패던지기', '이제간다아아아아앗']
-    enemySkillCoolDownDictionary = {'전투강타' : 800, '돌진' : 300, '방패던지기' : 500, '이제간다아아아아앗' : 1200}
-    enemySkillDamageDictionary = {'전투강타' : 4, '돌진' : 2, '방패던지기' : 5, '이제간다아아아아앗' : 9}
     enemyCurrIdx = -1
     enemySkillSet = False
     enemyHp = 100
@@ -53,8 +94,6 @@ def game():
     backSpaceOffset = 0
     enemyOffset = 0
     keyAvailable = True
-    isMyMoving = False
-    isEnemyMoving = False
     myLeftStunTime = 0
     enemyLeftStunTime = 0
     enemyLastInput_t = 0
@@ -122,7 +161,7 @@ def game():
                                 pass
                         else:
                             try:
-                                myTextBox.subStrFromRight(1)
+                                myTextBox.delStrFromRight(1)
                                 myTextBox.addStr(keyTuple[0])
                             except:
                                 pass
@@ -135,7 +174,7 @@ def game():
                                     pass
                             else:
                                 try:
-                                    myTextBox.subStrFromRight(1)
+                                    myTextBox.delStrFromRight(1)
                                     myTextBox.addStr(keyTuple[2])
                                 except:
                                     pass
@@ -150,7 +189,7 @@ def game():
         if pygame.key.get_pressed()[pygame.K_BACKSPACE] and keyAvailable:  # 백스페이스 누르는 동안 backSpace_t 증가
             if backSpace_t == 0:
                 bsp = myIME.backSpace()
-                myTextBox.subStrFromRight(1)
+                myTextBox.delStrFromRight(1)
                 if bsp is not None:
                     myTextBox.addStr(bsp)
             backSpace_t += 1000 / fps
@@ -163,11 +202,11 @@ def game():
         if pygame.key.get_pressed()[pygame.K_RETURN] and keyAvailable:
             myIME.resetState()  # 엔터 후 IME()를 리셋해야 한다.
             '''행동 성공 시'''
-            if myTextBox.getStr() in mySkillList:
+            if myTextBox.getStr() in mySkillDictionary:
                 myTextLog.addLine(myTextBox.getStr())
-                myMovingInterval = mySkillCoolDownDictionary[myTextBox.getStr()]
+                myMovingInterval = mySkillDictionary[myTextBox.getStr()]['COOLDOWN']
                 myLeftStunTime += myMovingInterval
-                isMyMoving = True
+                myTextBox.isMoving = True
                 keyAvailable = False
             else:
                 myTextBox.setStr('')
@@ -178,26 +217,26 @@ def game():
         '''지우기 실행'''
         if myTextBox.getStr() != '':
             if backSpace_t - backSpaceOffset >= backSpaceLatency:
-                myTextBox.subStrFromRight(1)
+                myTextBox.delStrFromRight(1)
                 backSpaceOffset += backSpaceLatency
                 backSpaceLatency = max(backSpaceThreshold, backSpaceLatency - backSpaceAcceleration)
 
         '''내 행동 완료 체크'''
-        if myLeftStunTime <= 0 and isMyMoving:
-            isMyMoving = False
+        if myLeftStunTime <= 0 and myTextBox.isMoving:
+            myTextBox.isMoving = False
             keyAvailable = True
-            enemyHp -= mySkillDamageDictionary[myTextBox.getStr()]
+            enemyHp -= mySkillDictionary[myTextBox.getStr()]['DAMAGE']
 
             if myTextBox.getStr() == '패리':
-                if 0 < global_t - enemyLastInput_t < justParryThreshold and isEnemyMoving:
-                    isEnemyMoving = False
+                if 0 < global_t - enemyLastInput_t < justParryThreshold and enemyTextBox.isMoving:
+                    enemyTextBox.isMoving = False
                     enemyTextBox.setStr('')
                     enemyLeftStunTime = enemyParryInterval
                     myLeftStunTime = myParryInterval
                     myParryTextOffset = global_t
-                elif 0 < global_t - enemyLastInput_t < lateParryThreshold and isEnemyMoving:
-                    isEnemyMoving = False
-                    myHp -= enemySkillDamageDictionary[enemyTextBox.getStr()] // 2
+                elif 0 < global_t - enemyLastInput_t < lateParryThreshold and enemyTextBox.isMoving:
+                    enemyTextBox.isMoving = False
+                    myHp -= enemySkillDictionary[enemyTextBox.getStr()]['DAMAGE'] // 2
                     enemyTextBox.setStr('')
                     myLeftStunTime = myParryInterval
 
@@ -234,8 +273,7 @@ def game():
                 
         '''적 행동 재설정'''
         if not enemySkillSet:
-            enemyCurrSkill = enemySkillList[random.randint(
-                0, len(enemySkillList) - 1)]
+            enemyCurrSkill = random.choice(list(enemySkillDictionary.keys()))
             enemyCurrIdx = 0
             enemyLetter = ''
             for i in range(len(enemyCurrSkill)):
@@ -250,10 +288,10 @@ def game():
         if enemyCurrIdx == len(enemyLetter) and global_t - enemyOffset >= enemyTypeInterval / 3:
             enemyLastInput_t = global_t
             '''적 행동 성공시'''
-            if enemyTextBox.getStr() in enemySkillList:
-                enemyMovingInterval = enemySkillCoolDownDictionary[enemyTextBox.getStr()]
+            if enemyTextBox.getStr() in enemySkillDictionary:
+                enemyMovingInterval = enemySkillDictionary[enemyTextBox.getStr()]['COOLDOWN']
                 enemyLeftStunTime += enemyMovingInterval
-                isEnemyMoving = True
+                enemyTextBox.isMoving = True
             enemyOffset += enemyTypeInterval + random.randrange(-1 * enemyTypeVarience, enemyTypeVarience + 1)
             enemyIME.resetState()
             enemySkillSet = False
@@ -269,7 +307,7 @@ def game():
                    pass
             else:
                 try:
-                    property = enemyTextBox.subStrFromRight(1)
+                    property = enemyTextBox.delStrFromRight(1)
                     enemyTextBox.addStr(keyTuple[0])
                 except:
                     pass
@@ -282,7 +320,7 @@ def game():
                         pass
                 else:
                     try:
-                        enemyTextBox.subStrFromRight(1)
+                        enemyTextBox.delStrFromRight(1)
                         enemyTextBox.addStr(keyTuple[2])
                     except:
                         pass
@@ -290,10 +328,10 @@ def game():
             enemyCurrIdx += 1
 
         '''적 행동 완료 체크'''
-        if enemyLeftStunTime <= 0 and isEnemyMoving:
-            isEnemyMoving = False
-            if enemyTextBox.getStr() in enemySkillList:
-                myHp -= enemySkillDamageDictionary[enemyTextBox.getStr()]
+        if enemyLeftStunTime <= 0 and enemyTextBox.isMoving:
+            enemyTextBox.isMoving = False
+            if enemyTextBox.getStr() in enemySkillDictionary:
+                myHp -= enemySkillDictionary[enemyTextBox.getStr()]['DAMAGE']
             enemyTextBox.setStr('')
 
         '''상태이상'''
@@ -301,7 +339,7 @@ def game():
             enemyHp -= 0.8 * enemyStatus['화상'] / fps
         if '감전' in enemyStatus:
             if enemyStatus['감전'] >= 5:
-                isEnemyMoving = False
+                enemyTextBox.isMoving = False
                 del enemyStatus['감전']
                 enemyLeftStunTime += 500
                 enemyTextBox.setStr('')
@@ -310,24 +348,20 @@ def game():
             enemyTypeInterval = (2 - (0.8)**enemyStatus['동상']) * enemyTypeIntervalInit
 
         '''명령어 유효성 체크'''
-        myTextBox.checkVaild(mySkillList)
-        enemyTextBox.checkVaild(enemySkillList)
-
-        '''무빙 여부 체크'''
-        myTextBox.isMoving = isMyMoving
-        enemyTextBox.isMoving = isEnemyMoving
+        myTextBox.checkVaild(mySkillDictionary)
+        enemyTextBox.checkVaild(enemySkillDictionary)
 
         '''입력창 Moving 시 pos 변경'''
-        if isMyMoving:
+        if myTextBox.isMoving:
             t = myLeftStunTime / myMovingInterval
-            myTextBox.setPos(myTextBox_initX, myTextBox_initY * t**3 + enemyTextBox_initY * (1-t**3))
+            myTextBox.setPos(myTextBox_initX, myTextBox_initY * t**4 + enemyTextBox_initY * (1-t**4))
         else:
             myTextBox.setPos(myTextBox_initX,myTextBox_initY)
-        if isEnemyMoving:
+        if enemyTextBox.isMoving:
             t = enemyLeftStunTime / enemyMovingInterval
-            enemyTextBox.setPos(myTextBox_initX, myTextBox_initY * (1-t**3) + enemyTextBox_initY * t**3)
+            enemyTextBox.setPos(enemyTextBox_initX, myTextBox_initY * (1-t**4) + enemyTextBox_initY * t**4)
         else:
-            enemyTextBox.setPos(myTextBox_initX,enemyTextBox_initY)
+            enemyTextBox.setPos(enemyTextBox_initX,enemyTextBox_initY)
 
         '''화면 출력'''
         screen.fill(pygame.Color("black"))
@@ -344,10 +378,10 @@ def game():
 
         '''가능한 행동 출력'''
         s = ''
-        for atk in mySkillList:
+        for atk in mySkillDictionary:
             s += (atk + ' / ')
         atkText = myFontSmall.render(s[:len(s)-3], True, (0, 255, 255))
-        screen.blit(atkText, (400, 550))
+        screen.blit(atkText, (300, 550))
 
         '''로그 및 입력창 출력'''
         myScene.draw()
