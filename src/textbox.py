@@ -48,8 +48,8 @@ class textBox(object):
 
     def getMainStr(self):
         s = ''
-        for (text, property) in self.table:
-            if property == 'NORMAL':
+        for (text, prop) in self.table:
+            if prop != 'BLANK':
                 s += text
         return s
 
@@ -60,14 +60,13 @@ class textBox(object):
         if self.getMainLen() == 0: return None
         return self.table[self.getMainLen() - 1][0]
 
-    def addMainStr(self, s):
+    def addMainStr(self, s, propNew = 'NORMAL'):
         addCnt = 0
         for i in range(self.getMaxLength()):
             (text, prop) = self.table[i]
             if prop == 'BLANK' and addCnt < len(s):
-                self.table[i] = (s[addCnt], 'NORMAL')
+                self.table[i] = (s[addCnt], propNew)
                 addCnt += 1
-        self.sortTable()
 
     def subMainStrFromLeft(self, k):  # 가장 왼쪽 k개의 문자를 제거하고 제거한 문자열 반환함
         removeCnt = 0
@@ -99,16 +98,19 @@ class textBox(object):
     def getColor(self, property):
         return self.propertyToColor[property]
     
-    '''테이블 정렬 메서드'''
+    def checkVaild(self, list):
+        self.isValid = self.getMainStr() in list
+
+    '''
+    테이블 정렬 메서드
     def sortTable(self):
         def propertyOrder(x1, x2):
             prop1 = x1[1]
             prop2 = x2[1]
             propertyOrder = {'NORMAL' : -1, 'ACTVIE' : -1, 'BLANK' : 0}
-            return propertyOrder[prop1] - propertyOrder[prop2]
-        
+            return propertyOrder[prop1] - propertyOrder[prop2]       
         self.table = sorted(self.table, key = cmp_to_key(propertyOrder))
-
+    '''
 
     '''출력 메서드'''
     def draw(self):
@@ -127,6 +129,6 @@ class textBox(object):
             x += self.fontSize[0]
 
         if self.isMoving:
-            pygame.draw.rect(self.getScreen(), self.screenColor, [self._pos[0]-4, self._pos[1]-4, self.fontSize[0]*self.getMaxLength()+8, self.fontSize[1]+8], 4)
+            pass
         else:
-            pygame.draw.rect(self.getScreen(), self.rectColor, [self._pos[0]-4, self._pos[1]-4, self.fontSize[0]*self.getMaxLength()+8, self.fontSize[1]+8], 4)
+            pygame.draw.rect(self.getScreen(), self.rectColor, [self._pos[0]-10, self._pos[1]-4, self.fontSize[0]*self.getMaxLength()+20, self.fontSize[1]+8], 4)

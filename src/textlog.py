@@ -17,7 +17,7 @@ class textLog(object):
 
     def addLine(self,s):
         self._logList.insert(0,s)
-        if len(self._logList) > self.size:
+        if len(self._logList) > self._size:
             self._logList.pop()
 
     def draw(self):
