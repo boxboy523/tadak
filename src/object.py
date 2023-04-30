@@ -5,6 +5,7 @@ class object:
     _id = None
     def __init__(self, p, s):
         self._pos = p
+        self._pos_init = p
         self._scene = s
         self._id = object._idCounter
         object._idCounter += 1

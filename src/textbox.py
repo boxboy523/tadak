@@ -1,4 +1,5 @@
 import pygame
+import math
 from functools import cmp_to_key
 from object import object
 
@@ -119,8 +120,11 @@ class textBox(object):
     '''출력 메서드'''
     def draw(self):
         (x, y) = self._pos
+        (_x, _y) = self._pos_init
         x += self.fontSize[0] * (self.getMaxLength() - self.getLen()) / 2
-        for (text, property) in self.table:
+        cnt = 0
+        for i in range(self.maxLength):
+            (text, property) = self.table[i]
             if property == 'BLANK':
                 pass
             else:
@@ -129,8 +133,16 @@ class textBox(object):
                 else:
                     (textColor, backgroundColor) = self.getColor(property)
                 toDraw = self.font.render(text, True, textColor, backgroundColor)
-                self.getScreen().blit(toDraw, (x, y))
-            x += self.fontSize[0]
+                if self.isMoving:
+                    dy = abs(y - _y)
+                    wiggle = self.skillDictionary[self.getStr()]['WIGGLE']
+                    frequency = self.skillDictionary[self.getStr()]['FREQUENCY']
+                    dx_wiggle = wiggle * 1.5 * math.sin(dy/frequency * 2 * math.pi + cnt**2) * (dy/300)**0.25 * (1 - dy/300)
+                    dy_wiggle = wiggle * math.sin(dy/frequency * 2 * math.pi + cnt**2) * (dy/300)**0.25 * (1 - dy/300)
+                    self.getScreen().blit(toDraw, (x + cnt * self.fontSize[0] + dx_wiggle, y + dy_wiggle))
+                else:
+                    self.getScreen().blit(toDraw, (x + cnt * self.fontSize[0], y))
+                cnt += 1
 
         if self.isMoving:
             pass

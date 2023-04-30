@@ -32,46 +32,66 @@ def game():
     mySkillDict = {
         '화염구' : {
             'COOLDOWN' : 600,
-            'DAMAGE' : 6
+            'DAMAGE' : 6,
+            'WIGGLE' : 30,
+            'FREQUENCY' : 200
         },
         '불덩이작렬' : {
             'COOLDOWN' : 2000,
-            'DAMAGE' : 20 
+            'DAMAGE' : 20,
+            'WIGGLE' : 50,
+            'FREQUENCY' : 200
         },
         '패리' : {
             'COOLDOWN' : 200,
-            'DAMAGE' : 0 
+            'DAMAGE' : 0,
+            'WIGGLE' : 0,
+            'FREQUENCY' : 1
         },
         '대규모냉각' : {
             'COOLDOWN' : 1000,
-            'DAMAGE' : 8 
+            'DAMAGE' : 8,
+            'WIGGLE' : 10,
+            'FREQUENCY' : 300
         },
         '볼트' : {
             'COOLDOWN' : 300,
-            'DAMAGE' : 2
+            'DAMAGE' : 2,
+            'WIGGLE' : 40,
+            'FREQUENCY' : 50
         },
         '체인라이트닝' : {
             'COOLDOWN' : 500,
-            'DAMAGE' : 12
+            'DAMAGE' : 12,
+            'WIGGLE' : 50,
+            'FREQUENCY' : 50
         }
     }
 
     enemySkillDict = {
         '전투강타' : {
             'COOLDOWN' : 800,
-            'DAMAGE' : 4
+            'DAMAGE' : 4,
+            'WIGGLE' : 30,
+            'FREQUENCY' : 300
         },
         '돌진' : {
             'COOLDOWN' : 300,
-            'DAMAGE' : 2
+            'DAMAGE' : 2,
+            'WIGGLE' : 0,
+            'FREQUENCY' : 1
         },
         '방패던지기' : {
             'COOLDOWN' : 500,
-            'DAMAGE' : 5
+            'DAMAGE' : 5,
+            'WIGGLE' : 0,
+            'FREQUENCY' : 300
         },
         '이제간다아아앗' : {
             'COOLDOWN' : 1200,
-            'DAMAGE' : 7
+            'DAMAGE' : 7,
+            'WIGGLE' : 70,
+            'FREQUENCY' : 300
         }
     }
 
@@ -106,15 +126,14 @@ def game():
     backSpaceLatency = backSpaceLatencyInit  # 글자 하나 지우는 데 드는 시간(ms)
 
     enemyTypeIntervalInit = 200 # 상대가 음소 하나를 입력하는 데 걸리는 시간(ms)
-    enemyTypeInterval = enemyTypeIntervalInit
+    enemyTypeInterval = enemyTypeIntervalInit 
     enemyTypeVarience = 100
 
     justParryThreshold = 200
-    lateParryThreshold = 400
-    enemyParryInterval = 1750
-    myParryInterval = 750
-    myParryTextOffset = -9999
-    myParryTextLifeTime = myParryInterval
+    enemyParryInterval = 1750 # 패리 성공 후 적이 스턴되는 시간
+    myParryInterval = 750 # 패리 성공 후 내가 스턴되는 시간
+    myParryTextOffset = -9999 # 패리! 텍스트를 띄우기 시작한 시점
+    myParryTextLifeTime = myParryInterval # 패리! 텍스트가 유지되는 시간
 
     running = True
     isKor = True
@@ -233,23 +252,18 @@ def game():
                     enemyLeftStunTime = enemyParryInterval
                     myLeftStunTime = myParryInterval
                     myParryTextOffset = global_t
-                elif 0 < global_t - enemyLastInput_t < lateParryThreshold and enemyTextBox.isMoving:
-                    enemyTextBox.isMoving = False
-                    myHp -= enemyTextBox.skillDictionary[enemyTextBox.getStr()]['DAMAGE'] // 2
-                    enemyTextBox.setStr('')
-                    myLeftStunTime = myParryInterval
 
             if myTextBox.getStr() == '화염구':
                 if not '화상' in enemyStatus:
                     enemyStatus['화상'] = 0
-                if enemyStatus['화상'] < 2:
+                if enemyStatus['화상'] < 5:
                     enemyStatus['화상'] += 1
 
             if myTextBox.getStr() == '불덩이작렬':
                 if not '화상' in enemyStatus:
                     enemyStatus['화상'] = 0
-                if enemyStatus['화상'] < 2:
-                    enemyStatus['화상'] += 1
+                if enemyStatus['화상'] < 5:
+                    enemyStatus['화상'] += 2
                 enemyLeftStunTime += 300
                 
             if myTextBox.getStr() == '대규모냉각':
@@ -340,6 +354,7 @@ def game():
                 del enemyStatus['감전']
                 enemyLeftStunTime += 500
                 enemyTextBox.setStr('')
+                enemyIME.resetState()
                 enemySkillSet = False
         if '동상' in enemyStatus:
             enemyTypeInterval = (2 - (0.8)**enemyStatus['동상']) * enemyTypeIntervalInit
